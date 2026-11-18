@@ -144,13 +144,13 @@ export const UnifiedSearch: React.FC = () => {
       </div>
 
       {/* Category Filter Pills (All, Songs, Albums & EPs, Artists) */}
-      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-3 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setCategory('all')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
             category === 'all'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-xs'
-              : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-900'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
           All Results
@@ -158,10 +158,10 @@ export const UnifiedSearch: React.FC = () => {
 
         <button
           onClick={() => setCategory('tracks')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
             category === 'tracks'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-xs'
-              : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-900'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
           <Music className="w-3.5 h-3.5" />
@@ -170,10 +170,10 @@ export const UnifiedSearch: React.FC = () => {
 
         <button
           onClick={() => setCategory('albums')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
             category === 'albums'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-xs'
-              : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-900'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
           <Disc3 className="w-3.5 h-3.5" />
@@ -182,10 +182,10 @@ export const UnifiedSearch: React.FC = () => {
 
         <button
           onClick={() => setCategory('artists')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
             category === 'artists'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-xs'
-              : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-900'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
           <User className="w-3.5 h-3.5" />
@@ -234,13 +234,23 @@ export const UnifiedSearch: React.FC = () => {
                   e.stopPropagation();
                   actions.toggleFollowArtist(searchData.topHit!.data as Artist);
                 }}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md active:scale-95 ${
                   actions.isArtistFollowed((searchData.topHit!.data as Artist).name)
-                    ? 'bg-white/15 text-emerald-400 border-emerald-500/40 hover:bg-white/25'
-                    : 'bg-emerald-500 hover:bg-emerald-400 text-black border-transparent shadow-lg hover:scale-105'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/40'
+                    : 'bg-white hover:bg-zinc-200 text-black border border-white/40'
                 }`}
               >
-                {actions.isArtistFollowed((searchData.topHit!.data as Artist).name) ? '✓ Following' : '+ Follow'}
+                {actions.isArtistFollowed((searchData.topHit!.data as Artist).name) ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Following</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Follow</span>
+                  </>
+                )}
               </button>
             </div>
           )}
@@ -369,7 +379,7 @@ export const UnifiedSearch: React.FC = () => {
                   />
                 </div>
 
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                   {artist.name}
                 </h4>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
@@ -381,14 +391,24 @@ export const UnifiedSearch: React.FC = () => {
                     e.stopPropagation();
                     actions.toggleFollowArtist(artist);
                   }}
-                  className={`mt-2.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all border ${
+                  className={`mt-2.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 ${
                     actions.isArtistFollowed(artist.name)
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30'
-                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700'
+                      ? 'bg-emerald-500/15 text-emerald-500 dark:text-[#D4FF00] border border-emerald-500/40 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/40'
+                      : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
                   }`}
                   title={actions.isArtistFollowed(artist.name) ? 'Click to Unfollow' : 'Follow Artist'}
                 >
-                  {actions.isArtistFollowed(artist.name) ? '✓ Following' : '+ Follow'}
+                  {actions.isArtistFollowed(artist.name) ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Following</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Follow</span>
+                    </>
+                  )}
                 </button>
               </div>
             ))}

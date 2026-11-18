@@ -18,7 +18,10 @@ import {
   Clock,
   Music,
   Heart,
-  User
+  User,
+  Check,
+  Globe,
+  SlidersHorizontal
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FEATURED_SPOTIFY_TRACKS, FEATURED_SPOTIFY_PLAYLISTS } from '../../services/spotifyService';
@@ -52,11 +55,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
   }, [state.currentTrack?.id, state.history.length, state.followedArtists, state.likedSongs]);
 
   const vibeCategories = [
-    { id: 'all', label: '🔥 All Bangers', filter: () => true },
-    { id: 'drops', label: '⚡ Fast Hook Drops (≤30s)', filter: (t: Track) => !!t.dropTime && t.dropTime <= 30 },
-    { id: 'club', label: '🔊 Club & Party Heat', filter: (t: Track) => t.votes > 25 },
-    { id: 'punjabi', label: '💥 Desi & Punjabi Hits', filter: (t: Track) => /Karan|AP Dhillon|Diljit|Riar|Arijit|Pritam/i.test(t.artist) },
-    { id: 'global', label: '🌍 Global Top 40', filter: (t: Track) => /Weeknd|Eminem|Dua Lipa|Drake|Taylor Swift|Sabrina|Billie|Styles|Balvin|Fonsi/i.test(t.artist) }
+    { id: 'all', label: 'All Bangers', icon: Flame, color: 'text-amber-500', filter: () => true },
+    { id: 'drops', label: 'Fast Hook Drops (≤30s)', icon: Zap, color: 'text-yellow-400', filter: (t: Track) => !!t.dropTime && t.dropTime <= 30 },
+    { id: 'club', label: 'Club & Party Heat', icon: Radio, color: 'text-purple-400', filter: (t: Track) => t.votes > 25 },
+    { id: 'punjabi', label: 'Desi & Punjabi Hits', icon: Sparkles, color: 'text-rose-400', filter: (t: Track) => /Karan|AP Dhillon|Diljit|Riar|Arijit|Pritam/i.test(t.artist) },
+    { id: 'global', label: 'Global Top 40', icon: Globe, color: 'text-sky-400', filter: (t: Track) => /Weeknd|Eminem|Dua Lipa|Drake|Taylor Swift|Sabrina|Billie|Styles|Balvin|Fonsi/i.test(t.artist) }
   ];
 
   const currentVibeFilter = vibeCategories.find((v) => v.id === selectedVibe)?.filter || (() => true);
@@ -178,8 +181,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white font-mono">
                     Curated
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-400">
-                    ⚡ Hook @ {spotlightTrack.dropTime || 28}s
+                  <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                    <Zap className="w-3 h-3 text-amber-400 shrink-0" />
+                    <span>Hook @ {spotlightTrack.dropTime || 28}s</span>
                   </span>
                 </div>
               </div>
@@ -243,99 +247,108 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
       {/* =========================================================================
           RECOMMENDATION SOURCE & VIBE FILTER BAR
-          Clean categorized filters without platform badges on songs
+          High-contrast responsive tabs with SVG icons (no raw emojis)
           ========================================================================= */}
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-3 border-b border-zinc-200 dark:border-zinc-800/80">
           <div>
-            <h2 className="text-xl sm:text-2xl font-display font-black text-zinc-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-display font-black text-zinc-900 dark:text-white flex items-center gap-2.5">
               <Sparkles className="w-6 h-6 text-emerald-500 dark:text-[#D4FF00]" />
               <span>Discover Music Recommendations</span>
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               Dynamically adapted to your recent listening history and curated charts.
             </p>
           </div>
 
-          {/* Clean Recommendation Tabs */}
-          <div className="inline-flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 self-start sm:self-auto flex-wrap">
+          {/* Section / Category Segmented Navigation */}
+          <div className="inline-flex items-center p-1 rounded-2xl bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 shadow-xs self-start lg:self-auto max-w-full overflow-x-auto scrollbar-none">
             <button
               onClick={() => setPlatformFilter('all')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 platformFilter === 'all'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className={`w-3.5 h-3.5 ${platformFilter === 'all' ? 'text-emerald-500 dark:text-[#D4FF00]' : 'text-zinc-400'}`} />
               <span>All Recommendations</span>
             </button>
 
             <button
               onClick={() => setPlatformFilter('recents')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 platformFilter === 'recents'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-emerald-600'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Based on Your Recents</span>
+              <Clock className={`w-3.5 h-3.5 ${platformFilter === 'recents' ? 'text-white' : 'text-emerald-500'}`} />
+              <span>Based on Recents</span>
             </button>
 
             <button
               onClick={() => setPlatformFilter('chartbusters')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 platformFilter === 'chartbusters'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-amber-500'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
-              <Flame className="w-3.5 h-3.5" />
+              <Flame className={`w-3.5 h-3.5 ${platformFilter === 'chartbusters' ? 'text-white' : 'text-amber-500'}`} />
               <span>Chartbusters ({FEATURED_SPOTIFY_TRACKS.length})</span>
             </button>
 
             <button
               onClick={() => setPlatformFilter('viral')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 platformFilter === 'viral'
-                  ? 'bg-cyan-600 text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-cyan-600'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
-              <TrendingUp className="w-3.5 h-3.5" />
+              <TrendingUp className={`w-3.5 h-3.5 ${platformFilter === 'viral' ? 'text-white' : 'text-cyan-500'}`} />
               <span>Viral Drops ({FEATURED_YOUTUBE_TRACKS.length})</span>
             </button>
 
             <button
               onClick={() => setPlatformFilter('personalized')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 platformFilter === 'personalized'
-                  ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`}
             >
-              <Disc3 className="w-3.5 h-3.5" />
+              <Disc3 className={`w-3.5 h-3.5 ${platformFilter === 'personalized' ? 'text-white' : 'text-purple-400'}`} />
               <span>For You</span>
             </button>
           </div>
         </div>
 
-        {/* Vibe Category Chips */}
+        {/* Vibe Category Chips with Crisp Lucide Icons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {vibeCategories.map((vibe) => (
-            <button
-              key={vibe.id}
-              onClick={() => setSelectedVibe(vibe.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap border shrink-0 ${
-                selectedVibe === vibe.id
-                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent shadow-xs scale-[1.02]'
-                  : 'bg-white dark:bg-[#121216] text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
-              }`}
-            >
-              {vibe.label}
-            </button>
-          ))}
+          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-bold mr-1 shrink-0 flex items-center gap-1.5">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Mood:</span>
+          </span>
+          {vibeCategories.map((vibe) => {
+            const IconComponent = vibe.icon;
+            const isSelected = selectedVibe === vibe.id;
+            return (
+              <button
+                key={vibe.id}
+                onClick={() => setSelectedVibe(vibe.id)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border shrink-0 flex items-center gap-1.5 shadow-xs ${
+                  isSelected
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent shadow-sm scale-[1.02]'
+                    : 'bg-white dark:bg-[#121216] text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-950 dark:hover:text-white'
+                }`}
+              >
+                <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-current' : vibe.color}`} />
+                <span>{vibe.label}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -398,13 +411,15 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     />
 
                     {/* Hook Drop Cue Badge */}
-                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
-                      ⚡ 0:{track.dropTime || 28}
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10 flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 text-amber-400" />
+                      <span>0:{track.dropTime || 28}</span>
                     </div>
 
                     {/* Inspired by badge on artwork */}
-                    <div className="absolute bottom-2 left-2 right-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur-md text-[10px] text-zinc-200 font-medium truncate border border-white/10">
-                      ✨ {item.inspiredBy}
+                    <div className="absolute bottom-2 left-2 right-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur-md text-[10px] text-zinc-200 font-medium truncate border border-white/10 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+                      <span className="truncate">{item.inspiredBy}</span>
                     </div>
 
                     {/* Floating Play Overlay */}
@@ -567,8 +582,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
 
-                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-mono text-amber-300 font-bold border border-white/10">
-                      ⚡ 0:{recTrack.dropTime}
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-mono text-amber-300 font-bold border border-white/10 flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 text-amber-400" />
+                      <span>0:{recTrack.dropTime}</span>
                     </div>
 
                     {/* Play Overlay */}
@@ -670,8 +686,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     />
 
                     {/* Hook Drop Cue Badge */}
-                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
-                      ⚡ 0:{track.dropTime || 28}
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10 flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 text-amber-400" />
+                      <span>0:{track.dropTime || 28}</span>
                     </div>
 
                     {/* Floating Play Overlay */}
@@ -821,8 +838,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     />
 
                     {/* Hook Drop Cue Badge */}
-                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
-                      ⚡ 0:{track.dropTime || 28}
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10 flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 text-amber-400" />
+                      <span>0:{track.dropTime || 28}</span>
                     </div>
 
                     {/* Floating Play Overlay */}
@@ -1001,7 +1019,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   />
                 </div>
 
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                   {artist.name}
                 </h4>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
@@ -1013,14 +1031,24 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     e.stopPropagation();
                     actions.toggleFollowArtist(artist);
                   }}
-                  className={`mt-2.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all border ${
+                  className={`mt-2.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 ${
                     isFollowed
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30'
-                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700'
+                      ? 'bg-emerald-500/15 text-emerald-500 dark:text-[#D4FF00] border border-emerald-500/40 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/40'
+                      : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
                   }`}
                   title={isFollowed ? 'Click to Unfollow' : 'Follow Artist'}
                 >
-                  {isFollowed ? '✓ Following' : '+ Follow'}
+                  {isFollowed ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Following</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Follow</span>
+                    </>
+                  )}
                 </button>
               </div>
             );

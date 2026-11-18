@@ -242,9 +242,10 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
                     </p>
                     <button
                       onClick={() => actions.toggleFollowArtist(artist)}
-                      className="mt-2 px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-bold transition-all shadow-xs"
+                      className="mt-2.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-xs active:scale-95"
                     >
-                      + Follow
+                      <Plus className="w-3 h-3" />
+                      <span>Follow</span>
                     </button>
                   </div>
                 ))}
@@ -270,7 +271,7 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
                   />
                 </div>
 
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                   {artist.name}
                 </h4>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
@@ -283,10 +284,11 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
                     e.stopPropagation();
                     actions.toggleFollowArtist(artist);
                   }}
-                  className="mt-2.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all border bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30"
+                  className="mt-2.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-emerald-500/15 text-emerald-500 dark:text-[#D4FF00] border border-emerald-500/40 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/40 shadow-xs active:scale-95"
                   title="Click to Unfollow"
                 >
-                  ✓ Following
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Following</span>
                 </button>
               </div>
             ))}
