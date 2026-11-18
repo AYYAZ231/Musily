@@ -115,9 +115,9 @@ export const AlbumViewModal: React.FC<AlbumViewModalProps> = ({ album, isOpen, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl animate-fade-in overflow-y-auto">
       {/* Outer Modal Container */}
-      <div className="relative w-full max-w-4xl bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-white">
+      <div className="relative w-full max-w-4xl bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[88vh] flex flex-col text-white">
         {/* Sticky Header with Close */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 px-6 bg-black/60 backdrop-blur-md border-b border-zinc-800/80">
           <div className="flex items-center gap-2">
