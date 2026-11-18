@@ -44,7 +44,7 @@ export interface Track {
   };
   votes: number;
   votedUserIds?: string[];
-  dropTime?: number; // timestamp in seconds where the drop/chorus starts (NAUX Drop mode)
+  dropTime?: number; // timestamp in seconds where the drop/chorus starts (Hook Drop mode)
 }
 
 export interface Participant {
@@ -66,7 +66,7 @@ export interface PartyRoom {
   currentTrack: Track | null;
   playbackPosition: number; // seconds
   lastSyncTimestamp: number;
-  dropMode: boolean; // NAUX drop format: drop straight into hook/chorus
+  dropMode: boolean; // Hook drop format: drop straight into hook/chorus
   crossfade: boolean;
   crossfadeDuration: number; // seconds (default 5s)
   queue: Track[];

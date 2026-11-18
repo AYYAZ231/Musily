@@ -11,7 +11,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: '34Na4j8AVgA',
-    votes: 8,
+    votes: 28,
     dropTime: 42
   },
   {
@@ -23,7 +23,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: '4NRXx6U8ABQ',
-    votes: 14,
+    votes: 35,
     dropTime: 28
   },
   {
@@ -35,7 +35,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: 'VNs_cCtdbPc',
-    votes: 19,
+    votes: 42,
     dropTime: 36
   },
   {
@@ -47,7 +47,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: 'ElZfdU54Cp8',
-    votes: 6,
+    votes: 19,
     dropTime: 52
   },
   {
@@ -59,7 +59,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: 'iAbnEUA0wpA',
-    votes: 11,
+    votes: 23,
     dropTime: 22
   },
   {
@@ -71,8 +71,80 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
     coverUrl: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&auto=format&fit=crop&q=80',
     source: 'spotify',
     youtubeId: 'LK7-_dgAVQE',
-    votes: 24,
+    votes: 51,
     dropTime: 32
+  },
+  {
+    id: 'sp_7',
+    title: 'Espresso',
+    artist: 'Sabrina Carpenter',
+    album: "Short n' Sweet",
+    duration: 175,
+    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'eVli-tstM5E',
+    votes: 38,
+    dropTime: 24
+  },
+  {
+    id: 'sp_8',
+    title: 'Birds of a Feather',
+    artist: 'Billie Eilish',
+    album: 'Hit Me Hard and Soft',
+    duration: 196,
+    coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'd5gxZEYS5B8',
+    votes: 45,
+    dropTime: 30
+  },
+  {
+    id: 'sp_9',
+    title: 'Cruel Summer',
+    artist: 'Taylor Swift',
+    album: 'Lover',
+    duration: 178,
+    coverUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'ic8j13piAhQ',
+    votes: 31,
+    dropTime: 26
+  },
+  {
+    id: 'sp_10',
+    title: 'Lose Yourself',
+    artist: 'Eminem',
+    album: '8 Mile Soundtrack',
+    duration: 326,
+    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'Wj7lL6eDOqc',
+    votes: 60,
+    dropTime: 33
+  },
+  {
+    id: 'sp_11',
+    title: 'As It Was',
+    artist: 'Harry Styles',
+    album: "Harry's House",
+    duration: 167,
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'H5v3kku4y6Q',
+    votes: 27,
+    dropTime: 20
+  },
+  {
+    id: 'sp_12',
+    title: 'Kesariya',
+    artist: 'Pritam, Arijit Singh',
+    album: 'Brahmastra',
+    duration: 268,
+    coverUrl: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&auto=format&fit=crop&q=80',
+    source: 'spotify',
+    youtubeId: 'BddP6PYo2gs',
+    votes: 44,
+    dropTime: 40
   }
 ];
 

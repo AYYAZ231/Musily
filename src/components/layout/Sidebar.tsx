@@ -69,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
         })}
       </div>
 
-      {/* Party Mode Card (NAUX Style) */}
+      {/* Party Mode Card (Musily Aux Style) */}
       <div className="mb-4 p-3 rounded-xl bg-zinc-50 dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">

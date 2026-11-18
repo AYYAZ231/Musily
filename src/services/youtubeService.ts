@@ -72,6 +72,78 @@ export const FEATURED_YOUTUBE_TRACKS: Track[] = [
     youtubeId: '_XbvH7pP4iA',
     votes: 16,
     dropTime: 40
+  },
+  {
+    id: 'yt_7',
+    title: 'Kinni Kinni',
+    artist: 'Diljit Dosanjh',
+    album: 'Ghost',
+    duration: 198,
+    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: '2b73u-X5Jg8',
+    votes: 34,
+    dropTime: 28
+  },
+  {
+    id: 'yt_8',
+    title: 'Despacito',
+    artist: 'Luis Fonsi, Daddy Yankee',
+    album: 'VIDA',
+    duration: 228,
+    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: 'kJQP7kiw5Fk',
+    votes: 48,
+    dropTime: 32
+  },
+  {
+    id: 'yt_9',
+    title: 'Houdini',
+    artist: 'Eminem',
+    album: 'The Death of Slim Shady',
+    duration: 227,
+    coverUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: '22tVWwmTie8',
+    votes: 55,
+    dropTime: 25
+  },
+  {
+    id: 'yt_10',
+    title: 'Calma (Remix)',
+    artist: 'Pedro Capó, Farruko',
+    album: 'Gangalee',
+    duration: 238,
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: '1_w7o9BGZao',
+    votes: 21,
+    dropTime: 30
+  },
+  {
+    id: 'yt_11',
+    title: 'Softly',
+    artist: 'Karan Aujla, Ikky',
+    album: 'Making Memories',
+    duration: 155,
+    coverUrl: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: 'cWMxCE2HTag',
+    votes: 39,
+    dropTime: 22
+  },
+  {
+    id: 'yt_12',
+    title: 'Lover',
+    artist: 'Diljit Dosanjh',
+    album: 'MoonChild Era',
+    duration: 191,
+    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    youtubeId: 'm4nF6A0F1nE',
+    votes: 41,
+    dropTime: 26
   }
 ];
 
@@ -82,7 +154,16 @@ export const FEATURED_YOUTUBE_PLAYLISTS: Playlist[] = [
     description: 'The most streamed Hindi, Punjabi & International party music on YouTube Music.',
     coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
     source: 'youtube',
-    trackCount: 20,
+    trackCount: 12,
+    tracks: FEATURED_YOUTUBE_TRACKS
+  },
+  {
+    id: 'yt_pl_2',
+    name: 'YouTube Music - Global Viral Video Drops 🎥',
+    description: 'Chart-dominating official music video drops and worldwide viral sensations.',
+    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
+    source: 'youtube',
+    trackCount: 12,
     tracks: FEATURED_YOUTUBE_TRACKS
   }
 ];

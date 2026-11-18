@@ -407,7 +407,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
         </div>
       </section>
 
-      {/* SECTION 4: PARTY & NAUX SYNC SETTINGS */}
+      {/* SECTION 4: PARTY & REAL-TIME SYNC SETTINGS */}
       <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0C0C0F] border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-900 dark:text-white">
