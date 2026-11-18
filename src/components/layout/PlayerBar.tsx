@@ -36,7 +36,7 @@ export const PlayerBar: React.FC = () => {
   };
 
   return (
-    <footer className="player-bar-container fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
+    <footer className="player-bar-container shrink-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Track Information */}
         <div className="flex items-center gap-2 min-w-0 max-w-[240px] sm:max-w-xs">

@@ -35,6 +35,8 @@ interface MusicStoreState {
   linkedAccounts: LinkedAccounts;
   equalizer: EqualizerSettings;
   isEqualizerOpen: boolean;
+  searchQuery: string;
+  isSidebarCollapsed: boolean;
 }
 
 const INITIAL_QUEUE: Track[] = [
@@ -118,6 +120,13 @@ const getInitialFollowedArtists = (): Artist[] => {
 // Session initialization
 const initialSessionUser = AuthService.getCurrentSession();
 
+const getInitialSidebarCollapsed = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('musily_sidebar_collapsed') === 'true';
+  }
+  return false;
+};
+
 // Singleton in-memory state
 let globalState: MusicStoreState = {
   currentUser: initialSessionUser,
@@ -143,6 +152,8 @@ let globalState: MusicStoreState = {
   theme: getInitialTheme(),
   equalizer: getInitialEqualizer(),
   isEqualizerOpen: false,
+  searchQuery: '',
+  isSidebarCollapsed: getInitialSidebarCollapsed(),
   linkedAccounts: {
     spotify: {
       isConnected: initialSessionUser ? initialSessionUser.spotifyConnected : SpotifyService.isConnected(),
@@ -957,6 +968,25 @@ export function useMusicStore() {
       return globalState.followedArtists.some(
         (a) => a.id.toLowerCase() === q || a.name.toLowerCase() === q
       );
+    },
+
+    setSearchQuery: (query: string) => {
+      updateState({ searchQuery: query });
+    },
+
+    setSidebarCollapsed: (collapsed: boolean) => {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('musily_sidebar_collapsed', String(collapsed));
+      }
+      updateState({ isSidebarCollapsed: collapsed });
+    },
+
+    toggleSidebarCollapse: () => {
+      const next = !globalState.isSidebarCollapsed;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('musily_sidebar_collapsed', String(next));
+      }
+      updateState({ isSidebarCollapsed: next });
     }
   };
 

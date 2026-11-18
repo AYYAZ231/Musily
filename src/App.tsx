@@ -105,7 +105,7 @@ export const App: React.FC = () => {
           onOpenAccountModal={() => setAccountModalOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-28 md:pb-24 relative z-40">
+        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-12 relative z-20">
           {state.activeTab === 'home' && (
             <HomeView
               onOpenPartyModal={() => setPartyModalOpen(true)}

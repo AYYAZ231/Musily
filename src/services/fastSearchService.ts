@@ -17,6 +17,44 @@ export class FastSearchService {
   private static cache = new Map<string, SearchResponse>();
   private static abortController: AbortController | null = null;
 
+  // JSONP helper for Deezer to bypass browser CORS cleanly
+  private static fetchDeezerJsonp(query: string): Promise<any> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return Promise.resolve({ data: [] });
+    }
+
+    return new Promise((resolve) => {
+      const cbName = 'dz_cb_' + Math.random().toString(36).substring(2, 9);
+      const script = document.createElement('script');
+      const timer = setTimeout(() => {
+        cleanup();
+        resolve({ data: [] });
+      }, 2000);
+
+      const cleanup = () => {
+        clearTimeout(timer);
+        try {
+          delete (window as any)[cbName];
+        } catch {}
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      };
+
+      (window as any)[cbName] = (data: any) => {
+        cleanup();
+        resolve(data);
+      };
+
+      script.src = `https://api.deezer.com/search/artist?q=${encodeURIComponent(query)}&output=jsonp&callback=${cbName}`;
+      script.onerror = () => {
+        cleanup();
+        resolve({ data: [] });
+      };
+      document.head.appendChild(script);
+    });
+  }
+
   // Immediate local index search (<2ms response)
   static searchLocal(query: string): SearchResponse {
     const q = query.toLowerCase().trim();
@@ -29,13 +67,31 @@ export class FastSearchService {
       };
     }
 
+    // Smart artist matching with rank ordering (exact > startsWith > includes)
     const matchedArtists = OFFICIAL_ARTISTS.filter(
       (a) => a.name.toLowerCase().includes(q) || a.genre.toLowerCase().includes(q)
-    );
+    ).sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      if (aName === q) return -1;
+      if (bName === q) return 1;
+      if (aName.startsWith(q) && !bName.startsWith(q)) return -1;
+      if (bName.startsWith(q) && !aName.startsWith(q)) return 1;
+      return 0;
+    });
 
+    // Smart album matching
     const matchedAlbums = [...OFFICIAL_ALBUMS, ...OFFICIAL_SINGLES_AND_EPS].filter(
       (alb) => alb.title.toLowerCase().includes(q) || alb.artist.toLowerCase().includes(q)
-    );
+    ).sort((a, b) => {
+      const aTitle = a.title.toLowerCase();
+      const bTitle = b.title.toLowerCase();
+      if (aTitle === q) return -1;
+      if (bTitle === q) return 1;
+      if (aTitle.startsWith(q) && !bTitle.startsWith(q)) return -1;
+      if (bTitle.startsWith(q) && !aTitle.startsWith(q)) return 1;
+      return 0;
+    });
 
     const allLocalTracks = [
       ...FEATURED_SPOTIFY_TRACKS,
@@ -43,22 +99,42 @@ export class FastSearchService {
       ...OFFICIAL_ALBUMS.flatMap((a) => a.tracks)
     ];
 
-    // Deduplicate tracks by id
+    // Deduplicate tracks by id and sort matches
     const seen = new Set<string>();
     const matchedTracks = allLocalTracks.filter((t) => {
       if (seen.has(t.id)) return false;
-      const match = t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q) || t.album.toLowerCase().includes(q);
+      const match =
+        t.title.toLowerCase().includes(q) ||
+        t.artist.toLowerCase().includes(q) ||
+        t.album.toLowerCase().includes(q);
       if (match) seen.add(t.id);
       return match;
+    }).sort((a, b) => {
+      const aTitle = a.title.toLowerCase();
+      const bTitle = b.title.toLowerCase();
+      if (aTitle === q) return -1;
+      if (bTitle === q) return 1;
+      if (aTitle.startsWith(q) && !bTitle.startsWith(q)) return -1;
+      if (bTitle.startsWith(q) && !aTitle.startsWith(q)) return 1;
+      return 0;
     });
 
+    // Determine Top Hit based on query relevance
     let topHit: SearchResponse['topHit'] = undefined;
-    if (matchedArtists.length > 0 && matchedArtists[0].name.toLowerCase() === q) {
+    if (
+      matchedArtists.length > 0 &&
+      (matchedArtists[0].name.toLowerCase().startsWith(q) || q.startsWith(matchedArtists[0].name.toLowerCase()))
+    ) {
       topHit = { type: 'artist', data: matchedArtists[0] };
-    } else if (matchedAlbums.length > 0 && matchedAlbums[0].title.toLowerCase() === q) {
+    } else if (
+      matchedAlbums.length > 0 &&
+      (matchedAlbums[0].title.toLowerCase().startsWith(q) || q.startsWith(matchedAlbums[0].title.toLowerCase()))
+    ) {
       topHit = { type: 'album', data: matchedAlbums[0] };
     } else if (matchedTracks.length > 0) {
       topHit = { type: 'track', data: matchedTracks[0] };
+    } else if (matchedArtists.length > 0) {
+      topHit = { type: 'artist', data: matchedArtists[0] };
     }
 
     return {
@@ -96,27 +172,32 @@ export class FastSearchService {
     try {
       // Parallel fast fetch with 1800ms timeout
       const fetchPromise = (async (): Promise<SearchResponse> => {
-        const [songRes, albumRes, artistRes] = await Promise.allSettled([
-          // Live song search
+        const [songRes, albumRes, artistDeezerRes, itunesArtistRes] = await Promise.allSettled([
+          // Live song search via iTunes
           fetch(
             `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=16`,
             { signal }
           ).then((r) => (r.ok ? r.json() : { results: [] })),
 
-          // Live album search
+          // Live album search via iTunes
           fetch(
             `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=8`,
             { signal }
           ).then((r) => (r.ok ? r.json() : { results: [] })),
 
-          // Live artist portrait search via Deezer API
+          // Live artist search via Deezer JSONP (bypasses browser CORS cleanly)
+          this.fetchDeezerJsonp(q),
+
+          // Live musicArtist entity search via iTunes
           fetch(
-            `https://api.deezer.com/search/artist?q=${encodeURIComponent(q)}`,
+            `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=musicArtist&limit=6`,
             { signal }
-          ).then((r) => (r.ok ? r.json() : { data: [] })).catch(() => ({ data: [] }))
+          ).then((r) => (r.ok ? r.json() : { results: [] }))
         ]);
 
         const remoteTracks: Track[] = [];
+        const extractedArtistMap = new Map<string, { name: string; genre: string; avatarUrl?: string }>();
+
         if (songRes.status === 'fulfilled' && Array.isArray(songRes.value?.results)) {
           songRes.value.results.forEach((item: any) => {
             const highRes = (item.artworkUrl100 || '').replace('100x100bb.jpg', '1000x1000bb.jpg');
@@ -133,6 +214,15 @@ export class FastSearchService {
               dropTime: 28,
               albumId: `alb_${item.collectionId}`
             });
+
+            // Extract artists from song results
+            if (item.artistName && !extractedArtistMap.has(item.artistName.toLowerCase())) {
+              extractedArtistMap.set(item.artistName.toLowerCase(), {
+                name: item.artistName,
+                genre: item.primaryGenreName || 'Music',
+                avatarUrl: highRes
+              });
+            }
           });
         }
 
@@ -145,7 +235,7 @@ export class FastSearchService {
               title: item.collectionName,
               artist: item.artistName,
               coverUrl: highRes,
-              year: (item.releaseDate || '').substring(0, 4),
+              year: (item.releaseDate || '').substring(0, 4) || '2024',
               releaseDate: item.releaseDate ? new Date(item.releaseDate).toLocaleDateString() : undefined,
               trackCount: item.trackCount || 10,
               type: item.trackCount > 5 ? 'album' : item.trackCount > 1 ? 'ep' : 'single',
@@ -156,14 +246,41 @@ export class FastSearchService {
         }
 
         const remoteArtists: Artist[] = [];
-        if (artistRes.status === 'fulfilled' && Array.isArray(artistRes.value?.data)) {
-          artistRes.value.data.slice(0, 3).forEach((item: any) => {
-            if (item.name && (item.picture_xl || item.picture_medium)) {
+        const seenArtistNames = new Set<string>();
+
+        // 1. Process Deezer Artist Results (highest quality 1000x1000 artwork)
+        if (
+          artistDeezerRes.status === 'fulfilled' &&
+          artistDeezerRes.value &&
+          Array.isArray(artistDeezerRes.value.data)
+        ) {
+          artistDeezerRes.value.data.slice(0, 5).forEach((item: any) => {
+            if (item.name && !seenArtistNames.has(item.name.toLowerCase())) {
+              seenArtistNames.add(item.name.toLowerCase());
               remoteArtists.push({
-                id: `art_${item.id}`,
+                id: `art_dz_${item.id}`,
                 name: item.name,
-                avatarUrl: item.picture_xl || item.picture_big || item.picture_medium,
-                genre: 'Artist'
+                avatarUrl: item.picture_xl || item.picture_big || item.picture_medium || item.picture,
+                genre: 'Artist',
+                bio: item.nb_fan ? `${(item.nb_fan).toLocaleString()} Fans on Deezer` : undefined
+              });
+            }
+          });
+        }
+
+        // 2. Process iTunes Artist Results
+        if (itunesArtistRes.status === 'fulfilled' && Array.isArray(itunesArtistRes.value?.results)) {
+          itunesArtistRes.value.results.slice(0, 4).forEach((item: any) => {
+            const nameLower = (item.artistName || '').toLowerCase();
+            if (nameLower && !seenArtistNames.has(nameLower)) {
+              seenArtistNames.add(nameLower);
+              const fallbackAvatar = extractedArtistMap.get(nameLower)?.avatarUrl ||
+                `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(item.artistName)}`;
+              remoteArtists.push({
+                id: `art_it_${item.artistId}`,
+                name: item.artistName,
+                avatarUrl: fallbackAvatar,
+                genre: item.primaryGenreName || 'Artist'
               });
             }
           });
@@ -197,6 +314,7 @@ export class FastSearchService {
           }
         });
 
+        // Smart Top Hit calculation
         let topHit = localMatches.topHit;
         if (!topHit && combinedArtists.length > 0) {
           topHit = { type: 'artist', data: combinedArtists[0] };

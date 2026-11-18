@@ -14,7 +14,8 @@ import {
   ArrowRight,
   SlidersHorizontal,
   Heart,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FastSearchService, SearchResponse } from '../../services/fastSearchService';
@@ -26,7 +27,6 @@ type SearchCategory = 'all' | 'tracks' | 'albums' | 'artists';
 
 export const UnifiedSearch: React.FC = () => {
   const { state, actions } = useMusicStore();
-  const [query, setQuery] = useState('');
   const [category, setCategory] = useState<SearchCategory>('all');
   const [loading, setLoading] = useState(false);
   const [searchData, setSearchData] = useState<SearchResponse>({
@@ -52,8 +52,8 @@ export const UnifiedSearch: React.FC = () => {
   ];
 
   useEffect(() => {
-    executeSearch('');
-  }, []);
+    executeSearch(state.searchQuery);
+  }, [state.searchQuery]);
 
   const executeSearch = async (searchTerm: string) => {
     const q = searchTerm === 'All Music' ? '' : searchTerm.trim();
@@ -81,7 +81,7 @@ export const UnifiedSearch: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setQuery(val);
+    actions.setSearchQuery(val);
 
     // Instant local filter on every keystroke
     const immediate = FastSearchService.searchLocal(val);
@@ -115,15 +115,26 @@ export const UnifiedSearch: React.FC = () => {
           <Search className="absolute left-4 w-5 h-5 text-zinc-400 pointer-events-none" />
           <input
             type="text"
-            value={query}
+            value={state.searchQuery}
             onChange={handleInputChange}
             placeholder="Search songs, official albums, EPs, or artists (e.g. Eminem, Starboy, Karan Aujla)..."
-            className="w-full pl-12 pr-12 py-3.5 bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm sm:text-base font-medium shadow-sm transition-all"
+            className="w-full pl-12 pr-20 py-3.5 bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm sm:text-base font-medium shadow-sm transition-all"
             autoFocus
           />
-          {loading && (
-            <div className="absolute right-4 w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          )}
+          <div className="absolute right-4 flex items-center gap-2">
+            {state.searchQuery && (
+              <button
+                onClick={() => actions.setSearchQuery('')}
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            {loading && (
+              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            )}
+          </div>
         </div>
 
         {/* Trending Suggestions Pills */}
@@ -132,8 +143,7 @@ export const UnifiedSearch: React.FC = () => {
             <button
               key={term}
               onClick={() => {
-                setQuery(term === 'All Music' ? '' : term);
-                executeSearch(term);
+                actions.setSearchQuery(term === 'All Music' ? '' : term);
               }}
               className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors shrink-0 border border-zinc-200/50 dark:border-zinc-700/50"
             >
@@ -203,8 +213,7 @@ export const UnifiedSearch: React.FC = () => {
           {searchData.topHit.type === 'artist' && (
             <div
               onClick={() => {
-                setQuery((searchData.topHit!.data as Artist).name);
-                executeSearch((searchData.topHit!.data as Artist).name);
+                actions.setSearchQuery((searchData.topHit!.data as Artist).name);
               }}
               className="p-5 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-black border border-zinc-800 text-white flex items-center justify-between gap-5 cursor-pointer group hover:border-emerald-500/50 transition-all shadow-xl max-w-xl"
             >
@@ -365,8 +374,7 @@ export const UnifiedSearch: React.FC = () => {
               <div
                 key={artist.id}
                 onClick={() => {
-                  setQuery(artist.name);
-                  executeSearch(artist.name);
+                  actions.setSearchQuery(artist.name);
                 }}
                 className="group p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center shadow-xs"
               >
@@ -432,7 +440,7 @@ export const UnifiedSearch: React.FC = () => {
           <div className="rounded-2xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/60">
             {displayedTracks.length === 0 ? (
               <div className="p-12 text-center text-xs text-zinc-400">
-                No songs matching "{query}". Try searching by song name or artist.
+                No songs matching "{state.searchQuery}". Try searching by song name or artist.
               </div>
             ) : (
               displayedTracks.map((track, idx) => {
