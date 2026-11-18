@@ -14,7 +14,7 @@ import { PassAuxModal } from './components/party/PassAuxModal';
 import { AccountLinkModal } from './components/library/AccountLinkModal';
 import { FullPlayerModal } from './components/player/FullPlayerModal';
 import { EqualizerModal } from './components/player/EqualizerModal';
-import { AuthModal } from './components/auth/AuthModal';
+import { AuthScreen } from './components/auth/AuthScreen';
 import { useMusicStore } from './store/useMusicStore';
 
 export const App: React.FC = () => {
@@ -32,6 +32,11 @@ export const App: React.FC = () => {
       }
     }
   }, []);
+
+  // When not authenticated, present the cinema-grade full-screen Auth Experience
+  if (!state.isAuthenticated) {
+    return <AuthScreen />;
+  }
 
   const isGlass = state.theme === 'glass';
 
@@ -106,7 +111,6 @@ export const App: React.FC = () => {
 
       <FullPlayerModal />
       <EqualizerModal />
-      <AuthModal />
     </div>
   );
 };
