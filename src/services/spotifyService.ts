@@ -79,7 +79,7 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
 export const FEATURED_SPOTIFY_PLAYLISTS: Playlist[] = [
   {
     id: 'sp_pl_1',
-    name: 'NAUX House Party Mix 🔥',
+    name: 'Spotify Viral Hits & Party Mix 🔥',
     description: 'High-octane Bollywood, Punjabi & EDM party drops that never let the vibe die down.',
     coverUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
     source: 'spotify',
@@ -146,44 +146,93 @@ export class SpotifyService {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
-  // Search Spotify Catalog (returns live matches or curated database)
+  // Search Spotify Catalog (queries real music catalog API with real songs and artists)
   static async search(query: string): Promise<Track[]> {
-    const q = query.toLowerCase().trim();
+    const q = query.trim();
     if (!q) return FEATURED_SPOTIFY_TRACKS;
 
-    // Filter curated list
-    const localMatches = FEATURED_SPOTIFY_TRACKS.filter(
-      (t) => t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)
-    );
-
-    // If query has custom terms, create realistic Spotify-matched tracks
-    if (localMatches.length > 0) return localMatches;
-
-    return [
-      {
-        id: `sp_search_${Date.now()}_1`,
-        title: query.charAt(0).toUpperCase() + query.slice(1),
-        artist: 'Trending Spotify Artist',
-        album: 'Top Hit Single',
-        duration: 215,
-        coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
-        source: 'spotify',
-        youtubeId: 'kJQP7kiw5Fk', // Despacito / party fallback
-        votes: 0,
-        dropTime: 35
-      },
-      {
-        id: `sp_search_${Date.now()}_2`,
-        title: `${query} (Party Remix / Club Mix)`,
-        artist: 'DJ Festival Mix',
-        album: 'Club Drop 2026',
-        duration: 198,
-        coverUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&auto=format&fit=crop&q=80',
-        source: 'spotify',
-        youtubeId: 'fJ9rUzIMcZQ', // Queen Bohemian / Bohemian / party fallback
-        votes: 0,
-        dropTime: 30
+    try {
+      // 1. If user has connected Spotify Web API token, query Spotify directly
+      const token = localStorage.getItem(this.TOKEN_KEY);
+      if (token && !token.startsWith('mock') && !token.startsWith('actual')) {
+        try {
+          const spRes = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=25`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (spRes.ok) {
+            const data = await spRes.json();
+            if (data.tracks?.items?.length) {
+              return data.tracks.items.map((item: any) => ({
+                id: `sp_${item.id}`,
+                title: item.name,
+                artist: item.artists.map((a: any) => a.name).join(', '),
+                album: item.album.name,
+                duration: Math.round(item.duration_ms / 1000),
+                coverUrl:
+                  item.album.images?.[0]?.url ||
+                  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80',
+                source: 'spotify' as const,
+                spotifyUri: item.uri,
+                streamUrl: item.preview_url || undefined,
+                votes: 0,
+                dropTime: 28
+              }));
+            }
+          }
+        } catch {}
       }
-    ];
+
+      // 2. Real Live Global Music Search (Spotify catalog equivalent with real artists and songs)
+      const res = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          return data.results.map((item: any) => ({
+            id: `sp_${item.trackId}`,
+            title: item.trackName,
+            artist: item.artistName,
+            album: item.collectionName || item.trackName,
+            duration: Math.round((item.trackTimeMillis || 180000) / 1000),
+            coverUrl: (item.artworkUrl100 || '').replace('100x100bb.jpg', '600x600bb.jpg'),
+            source: 'spotify' as const,
+            streamUrl: item.previewUrl,
+            votes: Math.floor(Math.random() * 15),
+            dropTime: 28
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('Live Spotify search failed, checking local matches:', err);
+    }
+
+    // Fallback: Local search against featured catalog
+    const qLower = q.toLowerCase();
+    return FEATURED_SPOTIFY_TRACKS.filter(
+      (t) => t.title.toLowerCase().includes(qLower) || t.artist.toLowerCase().includes(qLower)
+    );
+  }
+
+  // Search Artist details
+  static async searchArtist(query: string): Promise<{ name: string; genre: string } | null> {
+    const q = query.trim();
+    if (!q) return null;
+    try {
+      const res = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=musicArtist&limit=1`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results[0]) {
+          return {
+            name: data.results[0].artistName,
+            genre: data.results[0].primaryGenreName || 'Music'
+          };
+        }
+      }
+    } catch {}
+    return null;
   }
 }

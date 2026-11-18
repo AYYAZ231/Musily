@@ -60,7 +60,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
           )}
         </button>
 
-        {/* Drop Mode Switch (NAUX Signature) */}
+        {/* Drop Mode Switch (Skip to Chorus) */}
         <button
           onClick={actions.toggleDropMode}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${

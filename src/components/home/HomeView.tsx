@@ -518,7 +518,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal }) => {
         <div className="space-y-2 text-center md:text-left">
           <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-emerald-400 dark:text-[#D4FF00] font-bold">
             <Radio className="w-4 h-4" />
-            <span>NAUX Signature Party Mode</span>
+            <span>Live Aux Party Mode</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-display font-extrabold tracking-tight">
             Want to listen synchronized with friends right now?

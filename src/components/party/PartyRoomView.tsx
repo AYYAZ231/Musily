@@ -43,7 +43,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border border-emerald-500/20 text-xs font-mono font-bold tracking-wider uppercase">
             <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-ping" />
-            NAUX Protocol • Zero Cloud Fees
+            Musily Aux Protocol • Zero Cloud Fees
           </div>
           <h1 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-zinc-900 dark:text-white">
             THE LIVE PARTY AUX.

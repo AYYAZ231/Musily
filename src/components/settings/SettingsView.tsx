@@ -415,7 +415,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
           </div>
           <div>
             <h2 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white">
-              Party Aux & NAUX Live Sync
+              Party Aux & P2P Live Sync
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
               Zero-cost WebRTC Peer-to-Peer synchronization options for online party rooms.

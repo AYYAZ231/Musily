@@ -178,7 +178,7 @@ export const AuthScreen: React.FC = () => {
 
           <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-xs font-mono text-zinc-300">
             <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
-            <span>NAUX PROTOCOL LIVE</span>
+            <span>P2P AUX PROTOCOL LIVE</span>
           </div>
         </div>
 

@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
           <span className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
             Party Mode
           </span>
-          <span className="text-[10px] font-mono text-[#059669] dark:text-[#D4FF00] font-bold">NAUX</span>
+          <span className="text-[10px] font-mono text-[#059669] dark:text-[#D4FF00] font-bold">P2P LIVE</span>
         </div>
         <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-3 leading-relaxed">
           {state.isPartyActive
