@@ -11,7 +11,8 @@ import {
   Zap,
   Sparkles,
   Calendar,
-  Layers
+  Layers,
+  Heart
 } from 'lucide-react';
 import { Album, Track } from '../../types';
 import { useMusicStore } from '../../store/useMusicStore';
@@ -308,11 +309,26 @@ export const AlbumViewModal: React.FC<AlbumViewModalProps> = ({ album, isOpen, o
                         </span>
                       </div>
 
-                      {/* Col 5: Aux Queue / Vote */}
+                      {/* Col 5: Like, Aux Queue / Vote */}
                       <div
                         className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
+                        <button
+                          onClick={() => actions.toggleLikeSong(track)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            actions.isSongLiked(track.id, track.title)
+                              ? 'text-rose-500 hover:text-rose-400'
+                              : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                          }`}
+                          title={actions.isSongLiked(track.id, track.title) ? 'Unlike' : 'Like'}
+                        >
+                          <Heart
+                            className={`w-3.5 h-3.5 ${
+                              actions.isSongLiked(track.id, track.title) ? 'fill-rose-500' : ''
+                            }`}
+                          />
+                        </button>
                         <button
                           onClick={() => actions.addToQueue(track)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"

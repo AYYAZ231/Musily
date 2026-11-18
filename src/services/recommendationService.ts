@@ -1,20 +1,48 @@
-import { Track } from '../types';
+import { Track, Artist } from '../types';
 import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from './spotifyService';
 import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from './youtubeService';
+import { OFFICIAL_ALBUMS, OFFICIAL_ARTISTS } from './catalogService';
 
 export interface RecentRecommendation {
   track: Track;
   inspiredBy: string;
-  sourceType: 'recent' | 'inspired';
+  sourceType: 'recent' | 'followed' | 'liked' | 'inspired';
 }
 
 const ALL_AVAILABLE_TRACKS: Track[] = [
   ...FEATURED_SPOTIFY_TRACKS,
-  ...FEATURED_YOUTUBE_TRACKS
+  ...FEATURED_YOUTUBE_TRACKS,
+  ...OFFICIAL_ALBUMS.flatMap((a) => a.tracks)
 ];
 
 export class RecommendationService {
   private static readonly ALL_RECENTS_KEY = 'musily_all_recents';
+  private static readonly FOLLOWED_KEY = 'musily_followed_artists';
+  private static readonly LIKED_KEY = 'musily_liked_songs';
+
+  // Get followed artists from storage
+  static getFollowedArtists(): Artist[] {
+    try {
+      const raw = localStorage.getItem(this.FOLLOWED_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [OFFICIAL_ARTISTS[0], OFFICIAL_ARTISTS[1]];
+  }
+
+  // Get liked songs from storage
+  static getLikedSongs(): Track[] {
+    try {
+      const raw = localStorage.getItem(this.LIKED_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  }
 
   // Get combined recent listening history from Spotify, YouTube & local player
   static getRecentListens(): Track[] {
@@ -29,7 +57,6 @@ export class RecommendationService {
       }
     } catch {}
 
-    // Deduplicate tracks by id while preserving recency order
     const map = new Map<string, Track>();
 
     // Priority 1: explicitly played local recents
@@ -66,48 +93,86 @@ export class RecommendationService {
     } catch {}
   }
 
-  // Dynamically compute recommendations depending on recent Spotify & YouTube listens
+  // Dynamically compute recommendations depending on Followed Artists, Liked Songs & Recents
   static getRecommendationsFromRecents(): RecentRecommendation[] {
     const recents = this.getRecentListens();
+    const followed = this.getFollowedArtists();
+    const liked = this.getLikedSongs();
     const recommendations: RecentRecommendation[] = [];
     const usedTrackIds = new Set<string>();
 
-    // 1. Surface the top recently played tracks first
-    recents.slice(0, 4).forEach((track) => {
-      recommendations.push({
-        track,
-        inspiredBy: 'Recently Played',
-        sourceType: 'recent'
-      });
-      usedTrackIds.add(track.id);
-    });
+    // 1. TOP PRIORITY: Recommendations from Followed Artists
+    if (followed.length > 0) {
+      followed.forEach((artist) => {
+        const aName = artist.name.toLowerCase();
+        const artistTracks = ALL_AVAILABLE_TRACKS.filter(
+          (t) => !usedTrackIds.has(t.id) && t.artist.toLowerCase().includes(aName)
+        );
 
-    // 2. Extract recent artists and styles
-    const recentArtists = recents.map((t) => t.artist.toLowerCase());
-
-    // 3. Find matching tracks from catalog sharing similar artists or vibe
-    ALL_AVAILABLE_TRACKS.forEach((candidate) => {
-      if (usedTrackIds.has(candidate.id)) return;
-
-      const candArtist = candidate.artist.toLowerCase();
-
-      // Check if candidate artist matches any recent artist
-      const matchedRecent = recents.find((r) => {
-        const rTokens = r.artist.toLowerCase().split(/[,&]/).map((s) => s.trim());
-        return rTokens.some((token) => token.length > 2 && candArtist.includes(token));
-      });
-
-      if (matchedRecent) {
-        recommendations.push({
-          track: candidate,
-          inspiredBy: `Inspired by ${matchedRecent.artist.split(',')[0]}`,
-          sourceType: 'inspired'
+        artistTracks.slice(0, 2).forEach((track) => {
+          recommendations.push({
+            track,
+            inspiredBy: `From Followed Artist: ${artist.name}`,
+            sourceType: 'followed'
+          });
+          usedTrackIds.add(track.id);
         });
-        usedTrackIds.add(candidate.id);
+      });
+    }
+
+    // 2. SECOND PRIORITY: Top recently played tracks
+    recents.slice(0, 3).forEach((track) => {
+      if (!usedTrackIds.has(track.id)) {
+        recommendations.push({
+          track,
+          inspiredBy: 'Recently Played',
+          sourceType: 'recent'
+        });
+        usedTrackIds.add(track.id);
       }
     });
 
-    // 4. Fill remaining spots with top energy drops
+    // 3. THIRD PRIORITY: Inspired by Liked Songs
+    if (liked.length > 0 && recommendations.length < 8) {
+      const likedArtists = liked.map((t) => t.artist.toLowerCase());
+      ALL_AVAILABLE_TRACKS.forEach((candidate) => {
+        if (usedTrackIds.has(candidate.id) || recommendations.length >= 8) return;
+        const candArtist = candidate.artist.toLowerCase();
+        const matchesLiked = likedArtists.some((la) => candArtist.includes(la) || la.includes(candArtist));
+        if (matchesLiked) {
+          recommendations.push({
+            track: candidate,
+            inspiredBy: 'Based on Liked Songs',
+            sourceType: 'liked'
+          });
+          usedTrackIds.add(candidate.id);
+        }
+      });
+    }
+
+    // 4. FOURTH PRIORITY: Tracks inspired by Recent Artists
+    if (recommendations.length < 8) {
+      ALL_AVAILABLE_TRACKS.forEach((candidate) => {
+        if (usedTrackIds.has(candidate.id) || recommendations.length >= 8) return;
+
+        const candArtist = candidate.artist.toLowerCase();
+        const matchedRecent = recents.find((r) => {
+          const rTokens = r.artist.toLowerCase().split(/[,&]/).map((s) => s.trim());
+          return rTokens.some((token) => token.length > 2 && candArtist.includes(token));
+        });
+
+        if (matchedRecent) {
+          recommendations.push({
+            track: candidate,
+            inspiredBy: `Inspired by ${matchedRecent.artist.split(',')[0]}`,
+            sourceType: 'inspired'
+          });
+          usedTrackIds.add(candidate.id);
+        }
+      });
+    }
+
+    // 5. Fill remaining spots with top energy drops
     if (recommendations.length < 8) {
       ALL_AVAILABLE_TRACKS.forEach((fallback) => {
         if (!usedTrackIds.has(fallback.id) && recommendations.length < 8) {

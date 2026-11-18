@@ -12,7 +12,9 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Heart,
+  Check
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FastSearchService, SearchResponse } from '../../services/fastSearchService';
@@ -204,26 +206,42 @@ export const UnifiedSearch: React.FC = () => {
                 setQuery((searchData.topHit!.data as Artist).name);
                 executeSearch((searchData.topHit!.data as Artist).name);
               }}
-              className="p-5 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-black border border-zinc-800 text-white flex items-center gap-5 cursor-pointer group hover:border-emerald-500/50 transition-all shadow-xl max-w-xl"
+              className="p-5 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-black border border-zinc-800 text-white flex items-center justify-between gap-5 cursor-pointer group hover:border-emerald-500/50 transition-all shadow-xl max-w-xl"
             >
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/20 shadow-lg">
-                <img
-                  src={(searchData.topHit.data as Artist).avatarUrl}
-                  alt={(searchData.topHit.data as Artist).name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/20 shadow-lg">
+                  <img
+                    src={(searchData.topHit.data as Artist).avatarUrl}
+                    alt={(searchData.topHit.data as Artist).name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono uppercase font-bold text-emerald-400">
+                    Verified Artist
+                  </span>
+                  <h4 className="text-xl font-display font-black text-white truncate mt-1">
+                    {(searchData.topHit.data as Artist).name}
+                  </h4>
+                  <p className="text-xs text-zinc-400 truncate mt-0.5">
+                    {(searchData.topHit.data as Artist).genre}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono uppercase font-bold text-emerald-400">
-                  Verified Artist
-                </span>
-                <h4 className="text-xl font-display font-black text-white truncate mt-1">
-                  {(searchData.topHit.data as Artist).name}
-                </h4>
-                <p className="text-xs text-zinc-400 truncate mt-0.5">
-                  {(searchData.topHit.data as Artist).genre}
-                </p>
-              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  actions.toggleFollowArtist(searchData.topHit!.data as Artist);
+                }}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                  actions.isArtistFollowed((searchData.topHit!.data as Artist).name)
+                    ? 'bg-white/15 text-emerald-400 border-emerald-500/40 hover:bg-white/25'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-black border-transparent shadow-lg hover:scale-105'
+                }`}
+              >
+                {actions.isArtistFollowed((searchData.topHit!.data as Artist).name) ? '✓ Following' : '+ Follow'}
+              </button>
             </div>
           )}
 
@@ -357,6 +375,21 @@ export const UnifiedSearch: React.FC = () => {
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
                   {artist.genre}
                 </p>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    actions.toggleFollowArtist(artist);
+                  }}
+                  className={`mt-2.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all border ${
+                    actions.isArtistFollowed(artist.name)
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30'
+                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700'
+                  }`}
+                  title={actions.isArtistFollowed(artist.name) ? 'Click to Unfollow' : 'Follow Artist'}
+                >
+                  {actions.isArtistFollowed(artist.name) ? '✓ Following' : '+ Follow'}
+                </button>
               </div>
             ))}
           </div>
@@ -426,8 +459,8 @@ export const UnifiedSearch: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Drop Cue, Duration & Add to Queue */}
-                    <div className="flex items-center gap-3 shrink-0 text-xs font-mono">
+                    {/* Drop Cue, Duration & Quick Actions (Heart & Queue) */}
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-xs font-mono">
                       {track.dropTime && (
                         <span className="text-[10px] font-semibold text-amber-500 hidden sm:inline flex items-center gap-0.5">
                           <Zap className="w-3 h-3" />
@@ -438,6 +471,25 @@ export const UnifiedSearch: React.FC = () => {
                       <span className="text-zinc-400 dark:text-zinc-500">
                         {formatDuration(track.duration)}
                       </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          actions.toggleLikeSong(track);
+                        }}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          actions.isSongLiked(track.id, track.title)
+                            ? 'text-rose-500 hover:text-rose-600'
+                            : 'text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        }`}
+                        title={actions.isSongLiked(track.id, track.title) ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+                      >
+                        <Heart
+                          className={`w-4 h-4 ${
+                            actions.isSongLiked(track.id, track.title) ? 'fill-rose-500' : ''
+                          }`}
+                        />
+                      </button>
 
                       <button
                         onClick={(e) => {

@@ -9,7 +9,8 @@ import {
   Maximize2,
   Zap,
   Radio,
-  Sliders
+  Sliders,
+  Heart
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { EqualizerBars } from '../common/EqualizerBars';
@@ -38,47 +39,69 @@ export const PlayerBar: React.FC = () => {
     <footer className="player-bar-container fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Track Information */}
-        <div
-          onClick={() => actions.setFullPlayerOpen(true)}
-          className="flex items-center gap-3 min-w-0 max-w-[220px] sm:max-w-xs cursor-pointer group"
-        >
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm">
-            <img
-              src={track.coverUrl}
-              alt={track.title}
-              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                state.isPlaying ? 'scale-105' : ''
-              }`}
-            />
-            {state.isPlaying && (
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                <EqualizerBars isPlaying={true} size="sm" />
+        <div className="flex items-center gap-2 min-w-0 max-w-[240px] sm:max-w-xs">
+          <div
+            onClick={() => actions.setFullPlayerOpen(true)}
+            className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
+          >
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm">
+              <img
+                src={track.coverUrl}
+                alt={track.title}
+                className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                  state.isPlaying ? 'scale-105' : ''
+                }`}
+              />
+              {state.isPlaying && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <EqualizerBars isPlaying={true} size="sm" />
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0 truncate">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white truncate group-hover:underline">
+                  {track.title}
+                </span>
               </div>
-            )}
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{track.artist}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                {state.dropMode && (
+                  <span className="text-[9px] font-mono font-bold text-[#059669] dark:text-[#D4FF00] flex items-center gap-0.5">
+                    <Zap className="w-2.5 h-2.5" />
+                    Hook Drop
+                  </span>
+                )}
+                {state.isPartyActive && (
+                  <span className="text-[9px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-ping" />
+                    Party Synced
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="min-w-0 truncate">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white truncate group-hover:underline">
-                {track.title}
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{track.artist}</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              {state.dropMode && (
-                <span className="text-[9px] font-mono font-bold text-[#059669] dark:text-[#D4FF00] flex items-center gap-0.5">
-                  <Zap className="w-2.5 h-2.5" />
-                  Hook Drop
-                </span>
-              )}
-              {state.isPartyActive && (
-                <span className="text-[9px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-ping" />
-                  Party Synced
-                </span>
-              )}
-            </div>
-          </div>
+          {/* Quick Like / Heart Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              actions.toggleLikeSong(track);
+            }}
+            className={`p-1.5 rounded-lg transition-all active:scale-75 shrink-0 ${
+              actions.isSongLiked(track.id, track.title)
+                ? 'text-rose-500 hover:text-rose-600'
+                : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }`}
+            title={actions.isSongLiked(track.id, track.title) ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+          >
+            <Heart
+              className={`w-4 h-4 transition-transform duration-200 ${
+                actions.isSongLiked(track.id, track.title) ? 'fill-rose-500 scale-110' : ''
+              }`}
+            />
+          </button>
         </div>
 
         {/* Center: Controls & Scrubber */}

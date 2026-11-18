@@ -9,7 +9,8 @@ import {
   Volume2,
   VolumeX,
   Radio,
-  Disc3
+  Disc3,
+  Heart
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { EqualizerBars } from '../common/EqualizerBars';
@@ -92,12 +93,30 @@ export const FullPlayerModal: React.FC = () => {
           )}
         </div>
 
-        {/* Title & Artist */}
-        <div className="text-center space-y-1 mb-6">
-          <h2 className="text-xl sm:text-2xl font-display font-bold text-zinc-900 dark:text-white truncate max-w-sm">
-            {track.title}
-          </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{track.artist}</p>
+        {/* Title, Artist & Like Heart */}
+        <div className="flex items-center justify-between w-full max-w-sm px-2 mb-6">
+          <div className="text-left space-y-0.5 min-w-0 flex-1 pr-3">
+            <h2 className="text-xl sm:text-2xl font-display font-bold text-zinc-900 dark:text-white truncate">
+              {track.title}
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium truncate">{track.artist}</p>
+          </div>
+
+          <button
+            onClick={() => actions.toggleLikeSong(track)}
+            className={`p-3 rounded-full border transition-all active:scale-75 shrink-0 ${
+              actions.isSongLiked(track.id, track.title)
+                ? 'bg-rose-500/15 border-rose-500/40 text-rose-500 hover:bg-rose-500/25 shadow-md shadow-rose-500/10'
+                : 'bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+            }`}
+            title={actions.isSongLiked(track.id, track.title) ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+          >
+            <Heart
+              className={`w-5 h-5 transition-transform duration-200 ${
+                actions.isSongLiked(track.id, track.title) ? 'fill-rose-500 scale-110' : ''
+              }`}
+            />
+          </button>
         </div>
 
         {/* The Drop Mode Switch with glow */}

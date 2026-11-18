@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode, EqualizerBands, EqualizerSettings, UserProfile } from '../types';
+import { Track, Album, Artist, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode, EqualizerBands, EqualizerSettings, UserProfile } from '../types';
 import { AudioPlayer } from '../services/audioPlayer';
 import { PartyP2PService, PartyMessage } from '../services/partyP2PService';
 import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../services/spotifyService';
@@ -7,6 +7,7 @@ import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from '../services/youtubeServ
 import { DEFAULT_EQUALIZER_BANDS, EQUALIZER_PRESETS, AIAudioService } from '../services/aiAudioService';
 import { AuthService } from '../services/authService';
 import { RecommendationService } from '../services/recommendationService';
+import { OFFICIAL_ARTISTS } from '../services/catalogService';
 import confetti from 'canvas-confetti';
 
 interface MusicStoreState {
@@ -19,6 +20,8 @@ interface MusicStoreState {
   volume: number;
   queue: Track[];
   history: Track[];
+  likedSongs: Track[];
+  followedArtists: Artist[];
   activeTab: ActiveTab;
   isPartyActive: boolean;
   partyRoom: PartyRoom | null;
@@ -80,6 +83,38 @@ const applyThemeToDOM = (theme: ThemeMode) => {
   }
 };
 
+const getInitialLikedSongs = (): Track[] => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('musily_liked_songs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+  return [
+    FEATURED_SPOTIFY_TRACKS[0], // Starboy
+    FEATURED_YOUTUBE_TRACKS[0], // Tauba Tauba
+  ];
+};
+
+const getInitialFollowedArtists = (): Artist[] => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('musily_followed_artists');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+  return [
+    OFFICIAL_ARTISTS[0], // Eminem
+    OFFICIAL_ARTISTS[1], // The Weeknd
+  ];
+};
+
 // Session initialization
 const initialSessionUser = AuthService.getCurrentSession();
 
@@ -94,6 +129,8 @@ let globalState: MusicStoreState = {
   volume: 0.8,
   queue: INITIAL_QUEUE.slice(1),
   history: [],
+  likedSongs: getInitialLikedSongs(),
+  followedArtists: getInitialFollowedArtists(),
   activeTab: 'home',
   isPartyActive: false,
   partyRoom: null,
@@ -869,6 +906,57 @@ export function useMusicStore() {
         currentUser: null,
         isAuthenticated: false
       });
+    },
+
+    toggleLikeSong: (track: Track) => {
+      const isAlreadyLiked = globalState.likedSongs.some((t) => t.id === track.id || t.title === track.title);
+      let nextLiked: Track[];
+      if (isAlreadyLiked) {
+        nextLiked = globalState.likedSongs.filter((t) => t.id !== track.id && t.title !== track.title);
+      } else {
+        nextLiked = [track, ...globalState.likedSongs];
+      }
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem('musily_liked_songs', JSON.stringify(nextLiked));
+        } catch {}
+      }
+      updateState({ likedSongs: nextLiked });
+      return !isAlreadyLiked;
+    },
+
+    isSongLiked: (trackId?: string, trackTitle?: string) => {
+      if (!trackId && !trackTitle) return false;
+      return globalState.likedSongs.some((t) => (trackId && t.id === trackId) || (trackTitle && t.title === trackTitle));
+    },
+
+    toggleFollowArtist: (artist: Artist) => {
+      const isFollowed = globalState.followedArtists.some(
+        (a) => a.id === artist.id || a.name.toLowerCase() === artist.name.toLowerCase()
+      );
+      let nextFollowed: Artist[];
+      if (isFollowed) {
+        nextFollowed = globalState.followedArtists.filter(
+          (a) => a.id !== artist.id && a.name.toLowerCase() !== artist.name.toLowerCase()
+        );
+      } else {
+        nextFollowed = [artist, ...globalState.followedArtists];
+      }
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem('musily_followed_artists', JSON.stringify(nextFollowed));
+        } catch {}
+      }
+      updateState({ followedArtists: nextFollowed });
+      return !isFollowed;
+    },
+
+    isArtistFollowed: (artistNameOrId: string) => {
+      if (!artistNameOrId) return false;
+      const q = artistNameOrId.toLowerCase().trim();
+      return globalState.followedArtists.some(
+        (a) => a.id.toLowerCase() === q || a.name.toLowerCase() === q
+      );
     }
   };
 

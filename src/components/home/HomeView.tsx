@@ -16,13 +16,15 @@ import {
   Layers,
   CheckCircle2,
   Clock,
-  Music
+  Music,
+  Heart,
+  User
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FEATURED_SPOTIFY_TRACKS, FEATURED_SPOTIFY_PLAYLISTS } from '../../services/spotifyService';
 import { FEATURED_YOUTUBE_TRACKS, FEATURED_YOUTUBE_PLAYLISTS } from '../../services/youtubeService';
 import { RecommendationService, RecentRecommendation } from '../../services/recommendationService';
-import { CatalogService } from '../../services/catalogService';
+import { CatalogService, OFFICIAL_ARTISTS } from '../../services/catalogService';
 import { AlbumViewModal } from '../album/AlbumViewModal';
 import { EqualizerBars } from '../common/EqualizerBars';
 import { Track, Album } from '../../types';
@@ -43,11 +45,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
   const featuredAlbums = CatalogService.getAllReleases();
 
-  // Refresh dynamic recommendations based on recent Spotify & YouTube listens
+  // Refresh dynamic recommendations based on followed artists, liked songs & recent listens
   useEffect(() => {
     const recs = RecommendationService.getRecommendationsFromRecents();
     setRecentRecommendations(recs);
-  }, [state.currentTrack?.id, state.history.length]);
+  }, [state.currentTrack?.id, state.history.length, state.followedArtists, state.likedSongs]);
 
   const vibeCategories = [
     { id: 'all', label: '🔥 All Bangers', filter: () => true },
@@ -451,25 +453,39 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                       {track.artist}
                     </p>
 
-                    {/* Action Footer */}
+                    {/* Action Footer with Heart, Queue, Aux */}
                     <div className="flex items-center justify-between pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => actions.addToQueue(track)}
-                        className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1 text-[10px] font-semibold"
-                        title="Add to Next Up Queue"
+                        onClick={() => actions.toggleLikeSong(track)}
+                        className={`p-1 rounded-md transition-colors flex items-center gap-1 text-[10px] font-semibold ${
+                          actions.isSongLiked(track.id, track.title)
+                            ? 'text-rose-500 hover:text-rose-600'
+                            : 'text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        }`}
+                        title={actions.isSongLiked(track.id, track.title) ? 'Unlike' : 'Like'}
                       >
-                        <Plus className="w-3 h-3" />
-                        <span>Queue</span>
+                        <Heart className={`w-3.5 h-3.5 ${actions.isSongLiked(track.id, track.title) ? 'fill-rose-500' : ''}`} />
                       </button>
 
-                      <button
-                        onClick={() => actions.voteTrack(track.id)}
-                        className="p-1 rounded-md text-zinc-400 hover:text-emerald-600 dark:hover:text-[#D4FF00] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
-                        title="Upvote on Aux"
-                      >
-                        <ThumbsUp className="w-3 h-3" />
-                        <span>{track.votes}</span>
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => actions.addToQueue(track)}
+                          className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1 text-[10px] font-semibold"
+                          title="Add to Next Up Queue"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Queue</span>
+                        </button>
+
+                        <button
+                          onClick={() => actions.voteTrack(track.id)}
+                          className="p-1 rounded-md text-zinc-400 hover:text-emerald-600 dark:hover:text-[#D4FF00] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
+                          title="Upvote on Aux"
+                        >
+                          <ThumbsUp className="w-3 h-3" />
+                          <span>{track.votes}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -944,6 +960,71 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          FEATURED & FOLLOWED ARTISTS (Follow artists to tune recommendations)
+          ========================================================================= */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <User className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
+            <div>
+              <h3 className="text-lg sm:text-xl font-display font-extrabold text-zinc-900 dark:text-white">
+                Featured & Followed Artists
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Follow your favorite artists to immediately tune your Discover recommendations.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-mono text-zinc-400">1000x1000 Original Artwork</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {OFFICIAL_ARTISTS.map((artist) => {
+            const isFollowed = actions.isArtistFollowed(artist.name);
+            return (
+              <div
+                key={artist.id}
+                onClick={() => {
+                  actions.setActiveTab('search');
+                }}
+                className="group p-3.5 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center shadow-xs"
+              >
+                <div className="relative aspect-square w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-zinc-900 mb-2.5 shadow-md border-2 border-zinc-200 dark:border-zinc-700 group-hover:border-emerald-500 transition-colors">
+                  <img
+                    src={artist.avatarUrl}
+                    alt={artist.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate w-full group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                  {artist.name}
+                </h4>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
+                  {artist.genre}
+                </p>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    actions.toggleFollowArtist(artist);
+                  }}
+                  className={`mt-2.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all border ${
+                    isFollowed
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30'
+                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700'
+                  }`}
+                  title={isFollowed ? 'Click to Unfollow' : 'Follow Artist'}
+                >
+                  {isFollowed ? '✓ Following' : '+ Follow'}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
