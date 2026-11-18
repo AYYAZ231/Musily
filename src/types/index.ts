@@ -1,4 +1,5 @@
 export type MusicSource = 'spotify' | 'youtube' | 'local';
+export type ThemeMode = 'dark' | 'light';
 
 export interface Track {
   id: string;

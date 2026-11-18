@@ -20,7 +20,6 @@ export const App: React.FC = () => {
   const [isAccountModalOpen, setAccountModalOpen] = useState(false);
   const [isPassAuxOpen, setPassAuxOpen] = useState(false);
 
-  // Check URL query params for ?party=CODE or ?room=CODE
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -32,8 +31,8 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-slate-100">
-      {/* Floating Reaction Bursts (Real-time live across entire app) */}
+    <div className="flex h-screen w-screen overflow-hidden bg-[#F8F9FA] dark:bg-[#09090B] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
+      {/* Floating Reaction Bursts */}
       <FloatingReactions />
 
       {/* Desktop Navigation Sidebar */}
@@ -49,7 +48,7 @@ export const App: React.FC = () => {
           onOpenAccountModal={() => setAccountModalOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-36">
+        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pb-28 md:pb-24">
           {state.activeTab === 'home' && (
             <HomeView
               onOpenPartyModal={() => setPartyModalOpen(true)}

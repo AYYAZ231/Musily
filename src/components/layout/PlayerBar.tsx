@@ -8,8 +8,7 @@ import {
   VolumeX,
   Maximize2,
   Zap,
-  Radio,
-  ExternalLink
+  Radio
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 
@@ -34,14 +33,14 @@ export const PlayerBar: React.FC = () => {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-ink-950/95 backdrop-blur-xl border-t border-ink-800 px-4 py-2.5 transition-all select-none">
+    <footer className="fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Track Information */}
         <div
           onClick={() => actions.setFullPlayerOpen(true)}
           className="flex items-center gap-3 min-w-0 max-w-[220px] sm:max-w-xs cursor-pointer group"
         >
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-ink-850 border border-ink-800">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm">
             <img
               src={track.coverUrl}
               alt={track.title}
@@ -51,24 +50,24 @@ export const PlayerBar: React.FC = () => {
 
           <div className="min-w-0 truncate">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-sm font-semibold text-white truncate group-hover:underline">
+              <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white truncate group-hover:underline">
                 {track.title}
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{track.artist}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
-                className={`text-[9px] font-mono uppercase px-1 rounded ${
+                className={`text-[9px] font-mono uppercase px-1.5 py-0.2 rounded border font-semibold ${
                   track.source === 'spotify'
-                    ? 'text-spotify bg-spotify/10'
-                    : 'text-youtube bg-youtube/10'
+                    ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
+                    : 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10'
                 }`}
               >
                 {track.source === 'spotify' ? 'Spotify' : 'YouTube'}
               </span>
               {state.isPartyActive && (
-                <span className="text-[9px] font-mono text-lime flex items-center gap-0.5">
-                  <span className="w-1 h-1 rounded-full bg-lime animate-pulse" />
+                <span className="text-[9px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold flex items-center gap-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-pulse" />
                   Synced
                 </span>
               )}
@@ -82,7 +81,7 @@ export const PlayerBar: React.FC = () => {
             {/* Previous */}
             <button
               onClick={actions.prevTrack}
-              className="text-zinc-400 hover:text-white transition-colors active:scale-95"
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-95"
               title="Previous"
             >
               <SkipBack className="w-4 h-4" />
@@ -91,32 +90,32 @@ export const PlayerBar: React.FC = () => {
             {/* Play/Pause */}
             <button
               onClick={actions.togglePlay}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-subtle"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
               title={state.isPlaying ? 'Pause' : 'Play'}
             >
               {state.isPlaying ? (
-                <Pause className="w-4 h-4 fill-black" />
+                <Pause className="w-4 h-4 fill-current" />
               ) : (
-                <Play className="w-4 h-4 fill-black ml-0.5" />
+                <Play className="w-4 h-4 fill-current ml-0.5" />
               )}
             </button>
 
             {/* Next */}
             <button
               onClick={actions.nextTrack}
-              className="text-zinc-400 hover:text-white transition-colors active:scale-95"
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-95"
               title="Next"
             >
               <SkipForward className="w-4 h-4" />
             </button>
 
-            {/* Drop / Hook Toggle (NAUX style) */}
+            {/* Drop / Hook Toggle */}
             <button
               onClick={actions.toggleDropMode}
               className={`p-1 sm:px-2 sm:py-0.5 rounded text-[11px] font-mono uppercase flex items-center gap-1 transition-all border ${
                 state.dropMode
-                  ? 'bg-lime text-black border-lime font-bold'
-                  : 'bg-ink-900 border-ink-800 text-zinc-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold'
+                  : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
               title="The Hook / Drop: Skip intros and jump straight to the drop"
             >
@@ -125,9 +124,9 @@ export const PlayerBar: React.FC = () => {
             </button>
           </div>
 
-          {/* Time Scrubber (Desktop) */}
+          {/* Time Scrubber */}
           <div className="hidden sm:flex items-center gap-2.5 w-full">
-            <span className="text-[10px] text-zinc-500 font-mono min-w-[32px] text-right">
+            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono min-w-[32px] text-right">
               {formatTime(state.currentTime)}
             </span>
             <input
@@ -138,7 +137,7 @@ export const PlayerBar: React.FC = () => {
               onChange={handleSeek}
               className="w-full"
             />
-            <span className="text-[10px] text-zinc-500 font-mono min-w-[32px]">
+            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono min-w-[32px]">
               {formatTime(state.duration)}
             </span>
           </div>
@@ -150,10 +149,10 @@ export const PlayerBar: React.FC = () => {
           {state.isPartyActive && (
             <button
               onClick={() => actions.setActiveTab('party')}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-ink-900 border border-ink-800 text-xs font-mono text-zinc-300 hover:border-zinc-700"
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:border-zinc-400"
             >
-              <Radio className="w-3.5 h-3.5 text-lime" />
-              <span>{state.hasAux ? 'You hold the Aux' : 'Listening'}</span>
+              <Radio className="w-3.5 h-3.5 text-emerald-600 dark:text-[#D4FF00]" />
+              <span>{state.hasAux ? 'You have Aux' : 'Listening'}</span>
             </button>
           )}
 
@@ -161,7 +160,7 @@ export const PlayerBar: React.FC = () => {
           <div className="hidden md:flex items-center gap-2">
             <button
               onClick={() => actions.setVolume(state.volume > 0 ? 0 : 0.8)}
-              className="text-zinc-400 hover:text-white transition-colors"
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
             >
               {state.volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
@@ -179,7 +178,7 @@ export const PlayerBar: React.FC = () => {
           {/* Full Player Modal Button */}
           <button
             onClick={() => actions.setFullPlayerOpen(true)}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-ink-850 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             title="Expand View"
           >
             <Maximize2 className="w-4 h-4" />

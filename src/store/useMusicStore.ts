@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts } from '../types';
+import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode } from '../types';
 import { AudioPlayer } from '../services/audioPlayer';
 import { PartyP2PService, PartyMessage } from '../services/partyP2PService';
 import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../services/spotifyService';
@@ -23,6 +23,7 @@ interface MusicStoreState {
   chatMessages: ChatMessage[];
   isFullPlayerOpen: boolean;
   dropMode: boolean;
+  theme: ThemeMode;
   linkedAccounts: LinkedAccounts;
 }
 
@@ -32,6 +33,14 @@ const INITIAL_QUEUE: Track[] = [
   FEATURED_SPOTIFY_TRACKS[2],
   FEATURED_YOUTUBE_TRACKS[3]
 ];
+
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('musily_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+  }
+  return 'dark';
+};
 
 // Singleton in-memory state
 let globalState: MusicStoreState = {
@@ -51,6 +60,7 @@ let globalState: MusicStoreState = {
   chatMessages: [],
   isFullPlayerOpen: false,
   dropMode: false,
+  theme: getInitialTheme(),
   linkedAccounts: {
     spotify: {
       isConnected: SpotifyService.isConnected(),
@@ -85,8 +95,16 @@ export function useMusicStore() {
   const player = AudioPlayer.getInstance();
   const party = PartyP2PService.getInstance();
 
-  // Setup player event subscription once
   useEffect(() => {
+    // Apply theme to DOM on mount
+    if (typeof document !== 'undefined') {
+      if (globalState.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
     const unsubPlayer = player.subscribe(({ isPlaying, currentTime, duration, track }) => {
       updateState({
         isPlaying,
@@ -94,18 +112,12 @@ export function useMusicStore() {
         duration: duration || track?.duration || 0,
         currentTrack: track || globalState.currentTrack
       });
-
-      // If host in party, sync playback timestamp to party periodically
-      if (globalState.isPartyActive && globalState.isHost && globalState.partyRoom) {
-        // Debounce or sync when play status changes
-      }
     });
 
     player.setOnTrackEnded(() => {
       actions.nextTrack();
     });
 
-    // Party event listeners
     const unsubParty = party.subscribe((msg: PartyMessage) => {
       handleIncomingPartyMessage(msg);
     });
@@ -130,7 +142,6 @@ export function useMusicStore() {
           dropMode: room.dropMode
         });
 
-        // Sync track & position
         if (room.currentTrack && (!globalState.currentTrack || globalState.currentTrack.id !== room.currentTrack.id)) {
           player.loadTrack(room.currentTrack, room.isPlaying);
           player.seek(room.playbackPosition);
@@ -192,7 +203,6 @@ export function useMusicStore() {
           reactions: [...globalState.reactions.slice(-15), newReaction]
         });
 
-        // Trigger light confetti burst for party vibes!
         if (msg.payload.emoji === '🎉' || msg.payload.emoji === '🔥') {
           confetti({
             particleCount: 25,
@@ -208,7 +218,7 @@ export function useMusicStore() {
           id: 'chat_' + Date.now(),
           senderId: msg.senderId,
           senderName: msg.senderName,
-          senderColor: '#EC4899',
+          senderColor: '#10B981',
           text: msg.payload.text,
           timestamp: Date.now()
         };
@@ -239,7 +249,6 @@ export function useMusicStore() {
           }
           return t;
         });
-        // Sort queue by votes descending
         newQueue.sort((a, b) => b.votes - a.votes);
         updateState({ queue: newQueue });
         if (globalState.isHost && globalState.partyRoom) {
@@ -256,14 +265,13 @@ export function useMusicStore() {
             avatar: msg.payload.avatar,
             isHost: false,
             hasAux: false,
-            color: '#8B5CF6',
+            color: '#10B981',
             joinedAt: Date.now()
           };
           const updatedParts = [...globalState.partyRoom.participants, newPart];
           const updatedRoom = { ...globalState.partyRoom, participants: updatedParts };
           updateState({ partyRoom: updatedRoom });
 
-          // Send full state to newly joined user
           party.sendMessage({
             type: 'SYNC_STATE',
             payload: { room: updatedRoom },
@@ -287,6 +295,21 @@ export function useMusicStore() {
   };
 
   const actions = {
+    toggleTheme: () => {
+      const nextTheme: ThemeMode = globalState.theme === 'dark' ? 'light' : 'dark';
+      if (typeof document !== 'undefined') {
+        if (nextTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('musily_theme', nextTheme);
+      }
+      updateState({ theme: nextTheme });
+    },
+
     setActiveTab: (tab: ActiveTab) => updateState({ activeTab: tab }),
 
     setFullPlayerOpen: (open: boolean) => updateState({ isFullPlayerOpen: open }),
@@ -424,13 +447,12 @@ export function useMusicStore() {
       }
     },
 
-    // Party management
-    createParty: async (hostName: string = 'HostDJ') => {
+    createParty: async (hostName: string = 'PartyHost') => {
       try {
         const code = await party.createRoom(hostName);
         const initialRoom: PartyRoom = {
           id: code,
-          name: `${hostName}'s NAUX Aux Party 🔥`,
+          name: `${hostName}'s Party Room 🔥`,
           hostId: party.getUserId(),
           auxOwnerId: party.getUserId(),
           isPlaying: globalState.isPlaying,
@@ -449,7 +471,7 @@ export function useMusicStore() {
               avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${party.getUserId()}`,
               isHost: true,
               hasAux: true,
-              color: '#EC4899',
+              color: '#10B981',
               joinedAt: Date.now()
             }
           ]

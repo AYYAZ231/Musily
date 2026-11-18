@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Radio, Sparkles, User, Link as LinkIcon, Zap } from 'lucide-react';
+import { Search, Radio, User, Zap, Sun, Moon } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 
 interface TopBarProps {
@@ -11,16 +11,16 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
   const { state, actions } = useMusicStore();
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-8 py-3 bg-ink-950/80 backdrop-blur-md border-b border-ink-800">
+    <header className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-8 py-3 bg-white/80 dark:bg-[#0C0C0F]/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200">
       {/* Mobile Brand Title */}
       <div
         className="flex md:hidden items-center gap-2 cursor-pointer"
         onClick={() => actions.setActiveTab('home')}
       >
-        <div className="w-7 h-7 rounded-lg bg-ink-850 border border-ink-700 flex items-center justify-center">
-          <span className="w-2.5 h-2.5 rounded-full bg-lime" />
+        <div className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] dark:bg-[#D4FF00]" />
         </div>
-        <span className="font-display font-extrabold text-sm tracking-tight text-white">
+        <span className="font-display font-extrabold text-sm tracking-tight text-zinc-900 dark:text-white">
           MUSILY
         </span>
       </div>
@@ -28,28 +28,41 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
       {/* Search Input Trigger */}
       <div
         onClick={() => actions.setActiveTab('search')}
-        className="hidden sm:flex items-center gap-2.5 w-80 lg:w-96 px-3.5 py-1.5 rounded-lg bg-ink-900 border border-ink-800 hover:border-ink-700 cursor-pointer text-zinc-400 hover:text-zinc-200 transition-all text-xs"
+        className="hidden sm:flex items-center gap-2.5 w-80 lg:w-96 px-3.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all text-xs"
       >
-        <Search className="w-3.5 h-3.5 text-zinc-500" />
+        <Search className="w-3.5 h-3.5 text-zinc-400" />
         <span className="flex-1">Search Spotify, YouTube Music, artists...</span>
-        <kbd className="text-[10px] font-mono bg-ink-800 text-zinc-400 px-1.5 py-0.5 rounded border border-ink-700">
+        <kbd className="text-[10px] font-mono bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 shadow-sm">
           ⌘K
         </kbd>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Drop Mode Switch (NAUX Signature: Play straight from the hook) */}
+        {/* Dark / Light Theme Toggle Button */}
+        <button
+          onClick={actions.toggleTheme}
+          className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all"
+          title={`Switch to ${state.theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+        >
+          {state.theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-zinc-700" />
+          )}
+        </button>
+
+        {/* Drop Mode Switch (NAUX Signature) */}
         <button
           onClick={actions.toggleDropMode}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
             state.dropMode
-              ? 'bg-lime text-black border-lime font-bold'
-              : 'bg-ink-900 text-zinc-400 border-ink-800 hover:text-white hover:border-ink-700'
+              ? 'bg-[#10B981] text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold shadow-sm'
+              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-white'
           }`}
-          title="The Hook / Drop Mode: Skip intro and jump straight to the chorus (like naux.party)"
+          title="The Hook / Drop: Skip intros and jump straight to the chorus"
         >
-          <Zap className={`w-3.5 h-3.5 ${state.dropMode ? 'fill-black' : ''}`} />
+          <Zap className={`w-3.5 h-3.5 ${state.dropMode ? 'fill-current' : ''}`} />
           <span className="hidden sm:inline">
             {state.dropMode ? 'Drop: ON' : 'Drop: OFF'}
           </span>
@@ -59,25 +72,25 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
         {state.isPartyActive ? (
           <button
             onClick={() => actions.setActiveTab('party')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ink-900 border border-lime/40 text-lime text-xs font-mono font-bold hover:bg-ink-850 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981]/10 dark:bg-[#D4FF00]/10 border border-[#10B981]/40 dark:border-[#D4FF00]/40 text-[#059669] dark:text-[#D4FF00] text-xs font-mono font-bold transition-all"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-lime animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] dark:bg-[#D4FF00] animate-ping" />
             <span>ROOM #{state.partyRoom?.id}</span>
           </button>
         ) : (
           <button
             onClick={onOpenPartyModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ink-900 hover:bg-ink-850 border border-ink-800 text-white text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black text-xs font-bold transition-all shadow-sm"
           >
-            <Radio className="w-3.5 h-3.5 text-lime" />
+            <Radio className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Host Party</span>
           </button>
         )}
 
-        {/* User Avatar / Profile */}
+        {/* User Profile */}
         <button
           onClick={onOpenAccountModal}
-          className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 hover:border-zinc-600 flex items-center justify-center text-zinc-300 hover:text-white transition-all text-xs font-bold"
+          className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 flex items-center justify-center text-zinc-700 dark:text-zinc-300 transition-all text-xs font-bold"
           title="Manage Accounts"
         >
           {state.linkedAccounts.spotify.username?.charAt(0) || <User className="w-3.5 h-3.5" />}

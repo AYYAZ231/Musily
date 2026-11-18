@@ -58,13 +58,13 @@ export const UnifiedSearch: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none">
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         <input
           type="text"
           value={query}
           onChange={handleInputChange}
           placeholder="Search songs, artists, Spotify playlists, YouTube Music..."
-          className="w-full pl-11 pr-20 py-3 rounded-xl bg-ink-900 border border-ink-800 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full pl-11 pr-20 py-3 rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 text-sm focus:outline-none focus:border-zinc-400 shadow-sm transition-colors"
           autoFocus
         />
         {query && (
@@ -73,7 +73,7 @@ export const UnifiedSearch: React.FC = () => {
               setQuery('');
               handleSearch('');
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-white"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
           >
             Clear
           </button>
@@ -83,11 +83,13 @@ export const UnifiedSearch: React.FC = () => {
       {/* Filters & Tags */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Source Switcher */}
-        <div className="flex p-0.5 rounded-lg bg-ink-900 border border-ink-800">
+        <div className="flex p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-              filter === 'all' ? 'bg-ink-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+              filter === 'all'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
             }`}
           >
             All Sources
@@ -95,19 +97,23 @@ export const UnifiedSearch: React.FC = () => {
           <button
             onClick={() => setFilter('spotify')}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              filter === 'spotify' ? 'bg-spotify/20 text-spotify' : 'text-zinc-500 hover:text-zinc-300'
+              filter === 'spotify'
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
+                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-spotify" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1DB954]" />
             Spotify
           </button>
           <button
             onClick={() => setFilter('youtube')}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              filter === 'youtube' ? 'bg-youtube/20 text-youtube' : 'text-zinc-500 hover:text-zinc-300'
+              filter === 'youtube'
+                ? 'bg-red-500/10 text-red-600 dark:text-red-400 font-bold'
+                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-youtube" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF0033]" />
             YouTube Music
           </button>
         </div>
@@ -121,7 +127,7 @@ export const UnifiedSearch: React.FC = () => {
                 setQuery(g);
                 handleSearch(g);
               }}
-              className="px-2.5 py-1 rounded-md bg-ink-900 hover:bg-ink-850 border border-ink-800 text-[11px] text-zinc-400 hover:text-white whitespace-nowrap transition-colors"
+              className="px-2.5 py-1 rounded-md bg-white dark:bg-[#121216] hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-[11px] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white whitespace-nowrap transition-colors shadow-sm"
             >
               {g}
             </button>
@@ -138,9 +144,9 @@ export const UnifiedSearch: React.FC = () => {
           <span className="text-xs font-mono text-zinc-500">{results.length} tracks</span>
         </div>
 
-        <div className="rounded-xl bg-ink-900 border border-ink-800 overflow-hidden divide-y divide-ink-800/60">
+        <div className="rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/60">
           {loading ? (
-            <div className="p-8 text-center text-xs text-zinc-500">Searching catalogs...</div>
+            <div className="p-8 text-center text-xs text-zinc-400">Searching catalogs...</div>
           ) : (
             results.map((track) => {
               const isCurrent = state.currentTrack?.id === track.id;
@@ -148,12 +154,12 @@ export const UnifiedSearch: React.FC = () => {
                 <div
                   key={track.id}
                   onClick={() => actions.playTrack(track)}
-                  className={`flex items-center justify-between p-3 hover:bg-ink-850 transition-colors cursor-pointer group ${
-                    isCurrent ? 'bg-ink-850/80' : ''
+                  className={`flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer group ${
+                    isCurrent ? 'bg-emerald-500/5 dark:bg-zinc-800/80' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="relative w-11 h-11 rounded-md overflow-hidden bg-ink-800 shrink-0">
+                    <div className="relative w-11 h-11 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shrink-0 shadow-sm">
                       <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <Play className="w-4 h-4 text-white fill-white" />
@@ -163,29 +169,31 @@ export const UnifiedSearch: React.FC = () => {
                     <div className="min-w-0 truncate pr-3">
                       <p
                         className={`text-xs sm:text-sm font-semibold truncate ${
-                          isCurrent ? 'text-lime' : 'text-white'
+                          isCurrent
+                            ? 'text-[#059669] dark:text-[#D4FF00]'
+                            : 'text-zinc-900 dark:text-white'
                         }`}
                       >
                         {track.title}
                       </p>
-                      <p className="text-[11px] text-zinc-400 truncate">{track.artist}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">{track.artist}</p>
                     </div>
                   </div>
 
                   {/* Badges & Actions */}
                   <div className="flex items-center gap-3 shrink-0">
                     <span
-                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border hidden sm:inline ${
+                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border font-semibold hidden sm:inline ${
                         track.source === 'spotify'
-                          ? 'border-spotify/30 text-spotify bg-spotify/5'
-                          : 'border-youtube/30 text-youtube bg-youtube/5'
+                          ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
+                          : 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10'
                       }`}
                     >
                       {track.source === 'spotify' ? 'Spotify' : 'YouTube'}
                     </span>
 
                     {track.dropTime && (
-                      <span className="text-[10px] font-mono text-lime hidden md:inline">
+                      <span className="text-[10px] font-mono font-semibold text-[#059669] dark:text-[#D4FF00] hidden md:inline">
                         Drop @ {track.dropTime}s
                       </span>
                     )}
@@ -195,7 +203,7 @@ export const UnifiedSearch: React.FC = () => {
                         e.stopPropagation();
                         actions.addToQueue(track);
                       }}
-                      className="p-1.5 rounded bg-ink-800 hover:bg-ink-700 text-zinc-300 hover:text-white transition-colors"
+                      className="p-1.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors shadow-sm"
                       title={state.isPartyActive ? 'Queue to party' : 'Add to queue'}
                     >
                       <Plus className="w-4 h-4" />

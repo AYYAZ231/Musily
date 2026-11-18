@@ -32,18 +32,18 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
   if (!state.isPartyActive || !room) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center select-none">
-        <div className="w-16 h-16 rounded-2xl bg-ink-900 border border-ink-800 flex items-center justify-center mb-5">
-          <span className="w-5 h-5 rounded-full bg-lime animate-pulse" />
+        <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center mb-5 shadow-sm">
+          <span className="w-5 h-5 rounded-full bg-[#10B981] dark:bg-[#D4FF00] animate-pulse" />
         </div>
-        <h2 className="text-2xl font-display font-extrabold text-white mb-2 tracking-tight">
+        <h2 className="text-2xl font-display font-extrabold text-zinc-900 dark:text-white mb-2 tracking-tight">
           THE AUX, HANDLED.
         </h2>
-        <p className="text-zinc-400 max-w-sm text-xs mb-6 leading-relaxed">
+        <p className="text-zinc-500 dark:text-zinc-400 max-w-sm text-xs mb-6 leading-relaxed">
           Spin up a room to let Musily handle a continuous DJ-style set. Drop straight to the hooks, pass the Aux, and vote live with your friends online for free.
         </p>
         <button
           onClick={() => actions.createParty('PartyHost')}
-          className="px-6 py-2.5 rounded-lg bg-lime hover:bg-lime-hover text-black font-bold text-xs shadow-subtle transition-all active:scale-[0.98] flex items-center gap-2"
+          className="px-6 py-2.5 rounded-lg bg-[#10B981] hover:bg-[#059669] dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black font-bold text-xs shadow-sm transition-all active:scale-[0.98] flex items-center gap-2"
         >
           <Radio className="w-4 h-4" />
           <span>Create Party Room</span>
@@ -72,30 +72,30 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none">
       {/* Top Deck Room Banner */}
-      <div className="p-5 md:p-6 rounded-2xl bg-ink-900 border border-ink-800">
+      <div className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors duration-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-lime flex items-center gap-1 font-bold">
-                <span className="w-2 h-2 rounded-full bg-lime animate-ping" />
+              <span className="text-[11px] font-mono text-[#059669] dark:text-[#D4FF00] flex items-center gap-1 font-bold">
+                <span className="w-2 h-2 rounded-full bg-[#10B981] dark:bg-[#D4FF00] animate-ping" />
                 ROOM LIVE
               </span>
-              <span className="text-zinc-600">·</span>
-              <span className="text-xs font-mono text-zinc-400 uppercase">
-                CODE: <strong className="text-white">{room.id}</strong>
+              <span className="text-zinc-300 dark:text-zinc-700">·</span>
+              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase">
+                CODE: <strong className="text-zinc-900 dark:text-white">{room.id}</strong>
               </span>
             </div>
 
             <div className="flex items-center gap-2 pt-0.5">
-              <span className="text-xs text-zinc-400">The Aux is with:</span>
-              <span className="text-xs font-bold text-white bg-ink-800 px-2 py-0.5 rounded border border-ink-700">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">The Aux is with:</span>
+              <span className="text-xs font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
                 {currentAuxOwner ? currentAuxOwner.name : 'Host'}
                 {state.hasAux && ' (You)'}
               </span>
               {state.isHost && (
                 <button
                   onClick={onOpenPassAux}
-                  className="text-xs text-lime hover:underline font-semibold ml-1"
+                  className="text-xs text-[#059669] dark:text-[#D4FF00] hover:underline font-semibold ml-1"
                 >
                   Pass Aux ➔
                 </button>
@@ -107,9 +107,9 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
-              className="px-3 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-white text-xs font-medium border border-ink-700 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-medium border border-zinc-200 dark:border-zinc-700 flex items-center gap-1.5 transition-colors"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-lime" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-[#10B981] dark:text-[#D4FF00]" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Link Copied' : 'Share Link'}</span>
             </button>
 
@@ -117,8 +117,8 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
               onClick={actions.toggleDropMode}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1.5 ${
                 state.dropMode
-                  ? 'bg-lime text-black border-lime font-bold'
-                  : 'bg-ink-800 border-ink-700 text-zinc-400 hover:text-white'
+                  ? 'bg-zinc-900 text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold shadow-sm'
+                  : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
@@ -127,7 +127,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
             <button
               onClick={actions.leaveParty}
-              className="p-2 rounded-lg bg-ink-800 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-ink-700 transition-colors"
+              className="p-2 rounded-lg bg-zinc-100 hover:bg-red-500/20 text-zinc-500 hover:text-red-500 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:text-red-400 border border-zinc-200 dark:border-zinc-700 transition-colors"
               title="Leave Room"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -136,8 +136,8 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
         </div>
 
         {/* Reaction Bar */}
-        <div className="mt-4 pt-4 border-t border-ink-800 flex items-center justify-between gap-3">
-          <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">
+        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-3">
+          <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
             Reactions:
           </span>
           <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
               <button
                 key={emoji}
                 onClick={() => actions.sendReaction(emoji)}
-                className="text-lg p-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 transition-transform active:scale-90"
+                className="text-lg p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-transform active:scale-90"
               >
                 {emoji}
               </button>
@@ -155,13 +155,13 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-ink-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2">
         <button
           onClick={() => setActiveTab('queue')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'queue'
-              ? 'bg-ink-800 text-white'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-white shadow-sm'
+              : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
           Party Queue ({room.queue.length})
@@ -171,8 +171,8 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
           onClick={() => setActiveTab('chat')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'chat'
-              ? 'bg-ink-800 text-white'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-white shadow-sm'
+              : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
           Chat ({state.chatMessages.length})
@@ -182,8 +182,8 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
           onClick={() => setActiveTab('members')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'members'
-              ? 'bg-ink-800 text-white'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-white shadow-sm'
+              : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
           Listeners ({room.participants.length})
@@ -191,7 +191,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
         <button
           onClick={onOpenSearch}
-          className="ml-auto px-3 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-white text-xs font-semibold flex items-center gap-1 border border-ink-700 transition-all"
+          className="ml-auto px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Song</span>
@@ -203,26 +203,26 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
         <div className="space-y-3">
           {/* Active Now Playing */}
           {state.currentTrack && (
-            <div className="p-4 rounded-xl bg-ink-900 border border-ink-700 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 <img
                   src={state.currentTrack.coverUrl}
                   alt=""
-                  className="w-12 h-12 rounded-lg object-cover shrink-0 bg-ink-800"
+                  className="w-12 h-12 rounded-lg object-cover shrink-0 bg-zinc-100 dark:bg-zinc-800 shadow-sm"
                 />
                 <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase text-lime font-bold">
+                  <span className="text-[10px] font-mono uppercase text-[#059669] dark:text-[#D4FF00] font-bold">
                     ON THE AUX RIGHT NOW
                   </span>
-                  <h4 className="text-sm font-bold text-white truncate">
+                  <h4 className="text-sm font-bold text-zinc-900 dark:text-white truncate">
                     {state.currentTrack.title}
                   </h4>
-                  <p className="text-xs text-zinc-400 truncate">{state.currentTrack.artist}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{state.currentTrack.artist}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs font-mono text-zinc-400">
+                <span className="text-xs font-mono text-zinc-500">
                   {state.currentTrack.votes} votes
                 </span>
               </div>
@@ -231,16 +231,16 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
           {/* Up Next / Democratic Queue */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono text-zinc-500 uppercase px-1">
+            <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 uppercase px-1">
               Up Next (Voted songs play first)
             </span>
 
             {room.queue.length === 0 ? (
-              <div className="p-8 text-center rounded-xl bg-ink-900 border border-ink-800">
-                <p className="text-xs text-zinc-400 mb-3">The queue is empty.</p>
+              <div className="p-8 text-center rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">The queue is empty.</p>
                 <button
                   onClick={onOpenSearch}
-                  className="px-4 py-2 rounded-lg bg-lime hover:bg-lime-hover text-black text-xs font-bold transition-all"
+                  className="px-4 py-2 rounded-lg bg-[#10B981] hover:bg-[#059669] dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black text-xs font-bold transition-all shadow-sm"
                 >
                   Suggest Songs from Spotify / YouTube
                 </button>
@@ -249,37 +249,37 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
               room.queue.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-ink-900 hover:bg-ink-850 border border-ink-800 transition-colors"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#121216] hover:bg-zinc-50 dark:hover:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800 transition-colors shadow-sm"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs font-mono text-zinc-500 w-4 text-center">
+                    <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500 w-4 text-center">
                       {idx + 1}
                     </span>
                     <img
                       src={t.coverUrl}
                       alt=""
-                      className="w-9 h-9 rounded object-cover shrink-0 bg-ink-800"
+                      className="w-9 h-9 rounded object-cover shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
                     />
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-white truncate">{t.title}</p>
-                      <p className="text-[11px] text-zinc-400 truncate">{t.artist}</p>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate">{t.title}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">{t.artist}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => actions.voteTrack(t.id)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-ink-800 hover:bg-ink-700 text-white text-xs font-mono font-bold border border-ink-700 transition-all active:scale-95"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-mono font-bold border border-zinc-200 dark:border-zinc-700 transition-all active:scale-95"
                       title="Vote up"
                     >
-                      <ChevronUp className="w-3.5 h-3.5 text-lime" />
+                      <ChevronUp className="w-3.5 h-3.5 text-[#059669] dark:text-[#D4FF00]" />
                       <span>{t.votes}</span>
                     </button>
 
                     {state.hasAux && (
                       <button
                         onClick={() => actions.playTrack(t)}
-                        className="px-2.5 py-1 rounded bg-white hover:bg-zinc-200 text-black text-xs font-semibold"
+                        className="px-2.5 py-1 rounded bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold shadow-sm"
                       >
                         Play
                       </button>
@@ -294,33 +294,33 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
       {/* Chat View */}
       {activeTab === 'chat' && (
-        <div className="rounded-xl bg-ink-900 border border-ink-800 p-4 flex flex-col h-80">
+        <div className="rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 p-4 flex flex-col h-80 shadow-sm">
           <div className="flex-1 overflow-y-auto space-y-2.5 p-1">
             {state.chatMessages.length === 0 ? (
-              <div className="text-center text-xs text-zinc-500 py-12">
+              <div className="text-center text-xs text-zinc-400 dark:text-zinc-500 py-12">
                 No messages yet. Drop a comment for the DJ.
               </div>
             ) : (
               state.chatMessages.map((msg) => (
                 <div key={msg.id} className="text-xs">
-                  <span className="font-bold text-white mr-2">{msg.senderName}:</span>
-                  <span className="text-zinc-300">{msg.text}</span>
+                  <span className="font-bold text-zinc-900 dark:text-white mr-2">{msg.senderName}:</span>
+                  <span className="text-zinc-700 dark:text-zinc-300">{msg.text}</span>
                 </div>
               ))
             )}
           </div>
 
-          <form onSubmit={handleSendChat} className="flex items-center gap-2 pt-3 border-t border-ink-800">
+          <form onSubmit={handleSendChat} className="flex items-center gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Type a message or track request..."
-              className="flex-1 px-3 py-2 rounded-lg bg-ink-850 border border-ink-700 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-lime"
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 text-xs focus:outline-none focus:border-zinc-400"
             />
             <button
               type="submit"
-              className="px-3.5 py-2 rounded-lg bg-lime hover:bg-lime-hover text-black font-semibold text-xs transition-colors"
+              className="px-3.5 py-2 rounded-lg bg-[#10B981] hover:bg-[#059669] dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black font-semibold text-xs transition-colors"
             >
               Send
             </button>
@@ -334,18 +334,18 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
           {room.participants.map((p) => (
             <div
               key={p.id}
-              className="p-3 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-between"
+              className="p-3 rounded-lg bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center justify-between"
             >
               <div>
-                <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                <p className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                   {p.name}
                   {p.isHost && (
-                    <span className="text-[9px] font-mono uppercase bg-ink-800 px-1 rounded text-zinc-400">
+                    <span className="text-[9px] font-mono uppercase bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-zinc-500">
                       Host
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-zinc-500 font-mono">
+                <p className="text-[11px] text-zinc-400 font-mono">
                   {p.hasAux ? '🎧 Holding Aux' : 'Listener'}
                 </p>
               </div>
@@ -353,7 +353,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
               {state.isHost && !p.hasAux && (
                 <button
                   onClick={() => actions.passAux(p.id)}
-                  className="px-2 py-1 rounded bg-ink-800 hover:bg-ink-700 text-lime text-xs font-semibold border border-ink-700 transition-colors"
+                  className="px-2 py-1 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#059669] dark:text-[#D4FF00] text-xs font-semibold border border-zinc-200 dark:border-zinc-700 transition-colors"
                 >
                   Pass Aux
                 </button>

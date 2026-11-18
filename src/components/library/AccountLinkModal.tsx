@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, LogOut, ShieldCheck, Music2 } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 
 interface AccountLinkModalProps {
@@ -38,47 +38,47 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn select-none">
-      <div className="w-full max-w-md rounded-2xl bg-ink-950 border border-ink-800 p-6 shadow-elevated space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn select-none">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 p-6 shadow-xl space-y-5 transition-colors duration-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-display font-bold text-white uppercase tracking-tight">
+            <h3 className="text-base font-display font-bold text-zinc-900 dark:text-white uppercase tracking-tight">
               Linked Accounts
             </h3>
-            <p className="text-xs text-zinc-400">Stream audio and playlists from both services</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Stream audio and playlists from both services</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-500 hover:text-white transition-colors"
+            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* 1. Spotify */}
-        <div className="p-3.5 rounded-xl bg-ink-900 border border-ink-800 space-y-2">
+        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-spotify" />
-              <span className="text-xs font-semibold text-white">Spotify Account</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#1DB954]" />
+              <span className="text-xs font-semibold text-zinc-900 dark:text-white">Spotify Account</span>
             </div>
             {state.linkedAccounts.spotify.isConnected ? (
-              <span className="text-[10px] font-mono text-spotify font-semibold flex items-center gap-1">
+              <span className="text-[10px] font-mono text-[#1DB954] font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Connected
               </span>
             ) : (
-              <span className="text-[10px] text-zinc-500 font-mono">Not Connected</span>
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">Not Connected</span>
             )}
           </div>
 
           {state.linkedAccounts.spotify.isConnected ? (
             <div className="flex items-center justify-between pt-1 text-xs">
-              <span className="text-zinc-400">
-                User: <strong className="text-white">{state.linkedAccounts.spotify.username}</strong>
+              <span className="text-zinc-600 dark:text-zinc-400">
+                User: <strong className="text-zinc-900 dark:text-white">{state.linkedAccounts.spotify.username}</strong>
               </span>
               <button
                 onClick={actions.disconnectSpotify}
-                className="text-zinc-500 hover:text-red-400 text-xs font-medium"
+                className="text-zinc-400 hover:text-red-500 text-xs font-medium"
               >
                 Disconnect
               </button>
@@ -90,11 +90,11 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                 value={spotifyUser}
                 onChange={(e) => setSpotifyUser(e.target.value)}
                 placeholder="Spotify username"
-                className="flex-1 px-3 py-1.5 rounded-lg bg-ink-850 border border-ink-700 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
               />
               <button
                 type="submit"
-                className="px-3.5 py-1.5 rounded-lg bg-spotify text-black text-xs font-bold transition-all"
+                className="px-3.5 py-1.5 rounded-lg bg-[#1DB954] text-white text-xs font-bold transition-all"
               >
                 Link
               </button>
@@ -103,29 +103,29 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
         </div>
 
         {/* 2. YouTube Music */}
-        <div className="p-3.5 rounded-xl bg-ink-900 border border-ink-800 space-y-2">
+        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-youtube" />
-              <span className="text-xs font-semibold text-white">YouTube Music</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FF0033]" />
+              <span className="text-xs font-semibold text-zinc-900 dark:text-white">YouTube Music</span>
             </div>
             {state.linkedAccounts.youtube.isConnected ? (
-              <span className="text-[10px] font-mono text-youtube font-semibold flex items-center gap-1">
+              <span className="text-[10px] font-mono text-[#FF0033] font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Ready
               </span>
             ) : (
-              <span className="text-[10px] text-zinc-500 font-mono">Not Connected</span>
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">Not Connected</span>
             )}
           </div>
 
           {state.linkedAccounts.youtube.isConnected ? (
             <div className="flex items-center justify-between pt-1 text-xs">
-              <span className="text-zinc-400">
-                Channel: <strong className="text-white">{state.linkedAccounts.youtube.channelTitle}</strong>
+              <span className="text-zinc-600 dark:text-zinc-400">
+                Channel: <strong className="text-zinc-900 dark:text-white">{state.linkedAccounts.youtube.channelTitle}</strong>
               </span>
               <button
                 onClick={actions.disconnectYouTube}
-                className="text-zinc-500 hover:text-red-400 text-xs font-medium"
+                className="text-zinc-400 hover:text-red-500 text-xs font-medium"
               >
                 Disconnect
               </button>
@@ -137,11 +137,11 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                 value={ytChannel}
                 onChange={(e) => setYtChannel(e.target.value)}
                 placeholder="YouTube channel or alias"
-                className="flex-1 px-3 py-1.5 rounded-lg bg-ink-850 border border-ink-700 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
               />
               <button
                 type="submit"
-                className="px-3.5 py-1.5 rounded-lg bg-white text-black text-xs font-bold transition-all"
+                className="px-3.5 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black text-xs font-bold transition-all shadow-sm"
               >
                 Link
               </button>
@@ -150,8 +150,8 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
         </div>
 
         {/* 3. Playlist Import */}
-        <div className="p-3.5 rounded-xl bg-ink-900 border border-ink-800 space-y-2">
-          <span className="block text-[11px] font-mono text-zinc-400 uppercase">
+        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2">
+          <span className="block text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase">
             Import Playlist URL
           </span>
           <form onSubmit={handleImportPlaylist} className="flex gap-2">
@@ -160,17 +160,17 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
               value={playlistUrl}
               onChange={(e) => setPlaylistUrl(e.target.value)}
               placeholder="Paste Spotify or YouTube playlist URL"
-              className="flex-1 px-3 py-1.5 rounded-lg bg-ink-850 border border-ink-700 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+              className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
             />
             <button
               type="submit"
-              className="px-3.5 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-white text-xs font-semibold border border-ink-700 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-semibold border border-zinc-300 dark:border-zinc-700 transition-colors"
             >
               Import
             </button>
           </form>
           {importStatus && (
-            <p className="text-xs text-lime font-mono">{importStatus}</p>
+            <p className="text-xs text-[#059669] dark:text-[#D4FF00] font-mono">{importStatus}</p>
           )}
         </div>
 
