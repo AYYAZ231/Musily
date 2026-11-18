@@ -24,11 +24,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
       {/* Search Input Trigger */}
       <div
         onClick={() => actions.setActiveTab('search')}
-        className="hidden sm:flex items-center gap-2.5 w-80 lg:w-96 px-3.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all text-xs"
+        className="hidden sm:flex items-center gap-2.5 w-72 md:w-80 lg:w-96 px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all text-xs shrink-0"
       >
-        <Search className="w-3.5 h-3.5 text-zinc-400" />
-        <span className="flex-1">Search music, artists, genres...</span>
-        <kbd className="text-[10px] font-mono bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 shadow-sm">
+        <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+        <span className="flex-1 truncate whitespace-nowrap">Search music, artists, genres...</span>
+        <kbd className="text-[10px] font-mono bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 shadow-sm shrink-0">
           ⌘K
         </kbd>
       </div>
