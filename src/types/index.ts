@@ -26,6 +26,30 @@ export interface EqualizerSettings {
   aiLastInsight?: string;
 }
 
+export interface Album {
+  id: string;
+  title: string;
+  artist: string;
+  coverUrl: string;
+  year: string;
+  releaseDate?: string;
+  trackCount: number;
+  type: 'album' | 'single' | 'ep';
+  tracks: Track[];
+  source?: MusicSource;
+  genre?: string;
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  genre: string;
+  bio?: string;
+  topTracks?: Track[];
+  albums?: Album[];
+}
+
 export interface Track {
   id: string;
   title: string;
@@ -37,6 +61,8 @@ export interface Track {
   streamUrl?: string;
   youtubeId?: string;
   spotifyUri?: string;
+  albumId?: string;
+  trackNumber?: number;
   addedBy?: {
     id: string;
     name: string;

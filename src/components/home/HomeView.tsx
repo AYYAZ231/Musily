@@ -22,8 +22,10 @@ import { useMusicStore } from '../../store/useMusicStore';
 import { FEATURED_SPOTIFY_TRACKS, FEATURED_SPOTIFY_PLAYLISTS } from '../../services/spotifyService';
 import { FEATURED_YOUTUBE_TRACKS, FEATURED_YOUTUBE_PLAYLISTS } from '../../services/youtubeService';
 import { RecommendationService, RecentRecommendation } from '../../services/recommendationService';
+import { CatalogService } from '../../services/catalogService';
+import { AlbumViewModal } from '../album/AlbumViewModal';
 import { EqualizerBars } from '../common/EqualizerBars';
-import { Track } from '../../types';
+import { Track, Album } from '../../types';
 
 interface HomeViewProps {
   onOpenPartyModal: () => void;
@@ -37,6 +39,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
   const [platformFilter, setPlatformFilter] = useState<RecommendationFilter>('all');
   const [selectedVibe, setSelectedVibe] = useState('all');
   const [recentRecommendations, setRecentRecommendations] = useState<RecentRecommendation[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+
+  const featuredAlbums = CatalogService.getAllReleases();
 
   // Refresh dynamic recommendations based on recent Spotify & YouTube listens
   useEffect(() => {
@@ -880,6 +885,69 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       )}
 
       {/* =========================================================================
+          FEATURED OFFICIAL ALBUMS & EPS (Click to view full tracklist like Spotify)
+          ========================================================================= */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Disc3 className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
+            <div>
+              <h3 className="text-lg sm:text-xl font-display font-extrabold text-zinc-900 dark:text-white">
+                Official Albums & EPs
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Explore complete official tracklists, original artwork, and seamless album playback.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-mono text-zinc-400">Click to open album</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {featuredAlbums.slice(0, 12).map((album) => (
+            <div
+              key={album.id}
+              onClick={() => setSelectedAlbum(album)}
+              className="group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs"
+            >
+              {/* 1000x1000 Original Album Cover */}
+              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-900 mb-2.5 shadow-sm">
+                <img
+                  src={album.coverUrl}
+                  alt={album.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+
+                {/* Album / EP Pill */}
+                <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-[9px] font-mono uppercase font-bold text-white border border-white/10">
+                  {album.type}
+                </div>
+
+                {/* Floating Play Button */}
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-xl transform scale-80 group-hover:scale-100 transition-transform">
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-0.5">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                  {album.title}
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                  {album.artist}
+                </p>
+                <p className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                  {album.year || '2024'} · {album.trackCount} tracks
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* =========================================================================
           FEATURED STREAMING PLAYLIST SETS
           Clean: No platform names in titles or badges
           ========================================================================= */}
@@ -1110,6 +1178,13 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
           <span>Launch Party Deck</span>
         </button>
       </section>
+
+      {/* Full Spotify-Style Album Details Modal */}
+      <AlbumViewModal
+        album={selectedAlbum}
+        isOpen={!!selectedAlbum}
+        onClose={() => setSelectedAlbum(null)}
+      />
     </div>
   );
 };
