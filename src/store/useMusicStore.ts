@@ -823,6 +823,38 @@ export function useMusicStore() {
       return result;
     },
 
+    loginWithOAuth: (
+      provider: 'spotify' | 'youtube',
+      details: {
+        username?: string;
+        channelTitle?: string;
+        avatar?: string;
+        email?: string;
+        token?: string;
+      }
+    ) => {
+      const result = AuthService.loginWithOAuth(provider, details);
+      if (result.success && result.user) {
+        updateState({
+          currentUser: result.user,
+          isAuthenticated: true,
+          linkedAccounts: {
+            spotify: {
+              isConnected: result.user.spotifyConnected,
+              username: result.user.spotifyUsername || result.user.name,
+              avatar: result.user.avatar
+            },
+            youtube: {
+              isConnected: result.user.youtubeConnected,
+              channelTitle: result.user.youtubeChannel || result.user.name,
+              avatar: result.user.avatar
+            }
+          }
+        });
+      }
+      return result;
+    },
+
     logout: () => {
       AuthService.logout();
       updateState({

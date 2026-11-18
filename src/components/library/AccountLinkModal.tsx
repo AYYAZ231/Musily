@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
+import { SpotifyIcon, YouTubeIcon } from '../common/StreamingIcons';
+import { OAuthBrowserService } from '../../services/oauthBrowserService';
+import { AuthService } from '../../services/authService';
 
 interface AccountLinkModalProps {
   isOpen: boolean;
@@ -13,8 +16,37 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
   const [ytChannel, setYtChannel] = useState(state.linkedAccounts.youtube.channelTitle || '');
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [importStatus, setImportStatus] = useState('');
+  const [oauthLoading, setOauthLoading] = useState<'spotify' | 'youtube' | null>(null);
 
   if (!isOpen) return null;
+
+  const handleBrowserOAuth = async (provider: 'spotify' | 'youtube') => {
+    setOauthLoading(provider);
+    const res = await OAuthBrowserService.openOAuth(provider);
+    setOauthLoading(null);
+
+    if (res.success) {
+      if (provider === 'spotify') {
+        actions.linkSpotify(res.username || 'SpotifyUser');
+      } else {
+        actions.linkYouTube(res.channelTitle || 'YouTubeUser');
+      }
+
+      if (state.currentUser) {
+        AuthService.updateConnectedAccounts(
+          state.currentUser.id,
+          {
+            connected: provider === 'spotify' ? true : state.linkedAccounts.spotify.isConnected,
+            username: provider === 'spotify' ? res.username : state.linkedAccounts.spotify.username
+          },
+          {
+            connected: provider === 'youtube' ? true : state.linkedAccounts.youtube.isConnected,
+            channel: provider === 'youtube' ? res.channelTitle : state.linkedAccounts.youtube.channelTitle
+          }
+        );
+      }
+    }
+  };
 
   const handleSpotifyConnect = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +88,10 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
         </div>
 
         {/* 1. Spotify */}
-        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2">
+        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1DB954]" />
+              <SpotifyIcon className="w-4 h-4 text-[#1DB954]" />
               <span className="text-xs font-semibold text-zinc-900 dark:text-white">Spotify Account</span>
             </div>
             {state.linkedAccounts.spotify.isConnected ? (
@@ -84,29 +116,43 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSpotifyConnect} className="flex gap-2 pt-1">
-              <input
-                type="text"
-                value={spotifyUser}
-                onChange={(e) => setSpotifyUser(e.target.value)}
-                placeholder="Spotify username"
-                className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
-              />
+            <div className="space-y-2 pt-1">
               <button
-                type="submit"
-                className="px-3.5 py-1.5 rounded-lg bg-[#1DB954] text-white text-xs font-bold transition-all"
+                type="button"
+                disabled={oauthLoading !== null}
+                onClick={() => handleBrowserOAuth('spotify')}
+                className="w-full py-2 px-3 rounded-lg bg-[#1DB954] hover:bg-[#1ed760] text-black text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50"
               >
-                Link
+                <SpotifyIcon className="w-3.5 h-3.5" />
+                <span>
+                  {oauthLoading === 'spotify' ? 'Connecting Browser...' : 'Login with Spotify (Browser Connect)'}
+                </span>
               </button>
-            </form>
+
+              <form onSubmit={handleSpotifyConnect} className="flex gap-2">
+                <input
+                  type="text"
+                  value={spotifyUser}
+                  onChange={(e) => setSpotifyUser(e.target.value)}
+                  placeholder="Or enter Spotify username"
+                  className="flex-1 px-3 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                >
+                  Link
+                </button>
+              </form>
+            </div>
           )}
         </div>
 
         {/* 2. YouTube Music */}
-        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2">
+        <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF0033]" />
+              <YouTubeIcon className="w-4 h-4 text-[#FF0000]" />
               <span className="text-xs font-semibold text-zinc-900 dark:text-white">YouTube Music</span>
             </div>
             {state.linkedAccounts.youtube.isConnected ? (
@@ -131,21 +177,35 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
               </button>
             </div>
           ) : (
-            <form onSubmit={handleYouTubeConnect} className="flex gap-2 pt-1">
-              <input
-                type="text"
-                value={ytChannel}
-                onChange={(e) => setYtChannel(e.target.value)}
-                placeholder="YouTube channel or alias"
-                className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
-              />
+            <div className="space-y-2 pt-1">
               <button
-                type="submit"
-                className="px-3.5 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black text-xs font-bold transition-all shadow-sm"
+                type="button"
+                disabled={oauthLoading !== null}
+                onClick={() => handleBrowserOAuth('youtube')}
+                className="w-full py-2 px-3 rounded-lg bg-[#FF0000] hover:bg-[#ff1a1a] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50"
               >
-                Link
+                <YouTubeIcon className="w-3.5 h-3.5" />
+                <span>
+                  {oauthLoading === 'youtube' ? 'Connecting Browser...' : 'Login with YouTube (Browser Connect)'}
+                </span>
               </button>
-            </form>
+
+              <form onSubmit={handleYouTubeConnect} className="flex gap-2">
+                <input
+                  type="text"
+                  value={ytChannel}
+                  onChange={(e) => setYtChannel(e.target.value)}
+                  placeholder="Or enter YouTube channel"
+                  className="flex-1 px-3 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                >
+                  Link
+                </button>
+              </form>
+            </div>
           )}
         </div>
 

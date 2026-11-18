@@ -165,6 +165,95 @@ export class AuthService {
     } catch {}
   }
 
+  static loginWithOAuth(
+    provider: 'spotify' | 'youtube',
+    details: {
+      username?: string;
+      channelTitle?: string;
+      avatar?: string;
+      email?: string;
+      token?: string;
+    }
+  ): {
+    success: boolean;
+    user?: UserProfile;
+    error?: string;
+  } {
+    const users = this.getDb();
+    const displayName =
+      provider === 'spotify'
+        ? (details.username?.trim() || 'Spotify User')
+        : (details.channelTitle?.trim() || 'YouTube Music User');
+
+    const email =
+      details.email?.trim().toLowerCase() ||
+      `${displayName.toLowerCase().replace(/[^a-z0-9]/g, '_')}@musily.app`;
+
+    // Try finding existing user by streaming username/channel or email
+    let existingIndex = users.findIndex((u) => {
+      if (provider === 'spotify' && details.username && u.spotifyUsername) {
+        return u.spotifyUsername.toLowerCase() === details.username.toLowerCase();
+      }
+      if (provider === 'youtube' && details.channelTitle && u.youtubeChannel) {
+        return u.youtubeChannel.toLowerCase() === details.channelTitle.toLowerCase();
+      }
+      return u.email.toLowerCase() === email;
+    });
+
+    if (existingIndex >= 0) {
+      // Update existing user with connected streaming account
+      if (provider === 'spotify') {
+        users[existingIndex].spotifyConnected = true;
+        if (details.username) users[existingIndex].spotifyUsername = details.username;
+      } else {
+        users[existingIndex].youtubeConnected = true;
+        if (details.channelTitle) users[existingIndex].youtubeChannel = details.channelTitle;
+      }
+      if (details.avatar && !users[existingIndex].avatar) {
+        users[existingIndex].avatar = details.avatar;
+      }
+      this.saveDb(users);
+
+      const { password: _, spotifyPasswordOrToken: __, youtubePasswordOrToken: ___, ...userProfile } =
+        users[existingIndex];
+      try {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(userProfile));
+      } catch {}
+
+      return { success: true, user: userProfile };
+    }
+
+    // Otherwise create a new user profile via social login
+    const newUser: StoredUser = {
+      id: `usr_${provider}_${Date.now()}`,
+      name: displayName,
+      email: email,
+      password: `oauth_${provider}_${Math.random().toString(36).substring(2)}`,
+      avatar:
+        details.avatar ||
+        `https://api.dicebear.com/7.x/${provider === 'spotify' ? 'identicon' : 'bottts'}/svg?seed=${encodeURIComponent(
+          displayName
+        )}`,
+      createdAt: Date.now(),
+      spotifyConnected: provider === 'spotify',
+      spotifyUsername: provider === 'spotify' ? details.username : undefined,
+      spotifyPasswordOrToken: provider === 'spotify' ? (details.token || 'oauth_connected') : undefined,
+      youtubeConnected: provider === 'youtube',
+      youtubeChannel: provider === 'youtube' ? details.channelTitle : undefined,
+      youtubePasswordOrToken: provider === 'youtube' ? (details.token || 'oauth_connected') : undefined
+    };
+
+    users.push(newUser);
+    this.saveDb(users);
+
+    const { password: _, spotifyPasswordOrToken: __, youtubePasswordOrToken: ___, ...userProfile } = newUser;
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(userProfile));
+    } catch {}
+
+    return { success: true, user: userProfile };
+  }
+
   static updateConnectedAccounts(
     userId: string,
     spotify: { connected: boolean; username?: string; password?: string },

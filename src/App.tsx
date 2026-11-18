@@ -15,6 +15,7 @@ import { AccountLinkModal } from './components/library/AccountLinkModal';
 import { FullPlayerModal } from './components/player/FullPlayerModal';
 import { EqualizerModal } from './components/player/EqualizerModal';
 import { AuthScreen } from './components/auth/AuthScreen';
+import { OAuthPopupView } from './components/auth/OAuthPopupView';
 import { useMusicStore } from './store/useMusicStore';
 
 export const App: React.FC = () => {
@@ -22,6 +23,15 @@ export const App: React.FC = () => {
   const [isPartyModalOpen, setPartyModalOpen] = useState(false);
   const [isAccountModalOpen, setAccountModalOpen] = useState(false);
   const [isPassAuxOpen, setPassAuxOpen] = useState(false);
+
+  // Check if current window was spawned as an OAuth browser authentication window
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const oauthProvider = params.get('oauth');
+    if (oauthProvider === 'spotify' || oauthProvider === 'youtube') {
+      return <OAuthPopupView provider={oauthProvider} />;
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

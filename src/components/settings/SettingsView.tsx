@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { ThemeMode } from '../../types';
+import { SpotifyIcon, YouTubeIcon } from '../common/StreamingIcons';
+import { OAuthBrowserService } from '../../services/oauthBrowserService';
+import { AuthService } from '../../services/authService';
 
 interface SettingsViewProps {
   onOpenAccountModal: () => void;
@@ -32,6 +35,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
   const [djName, setDjName] = useState(state.linkedAccounts.spotify.username || 'MusilyDJ');
   const [dropThreshold, setDropThreshold] = useState(28); // 28% into track
   const [isSavedNotice, setIsSavedNotice] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState<'spotify' | 'youtube' | null>(null);
+
+  const handleBrowserOAuthConnect = async (provider: 'spotify' | 'youtube') => {
+    setIsOAuthLoading(provider);
+    const res = await OAuthBrowserService.openOAuth(provider);
+    setIsOAuthLoading(null);
+
+    if (res.success) {
+      if (provider === 'spotify') {
+        await actions.linkSpotify(res.username || 'SpotifyUser');
+      } else {
+        await actions.linkYouTube(res.channelTitle || 'YouTubeUser');
+      }
+
+      // Also persist to current session user in AuthService if logged in
+      if (state.currentUser) {
+        AuthService.updateConnectedAccounts(
+          state.currentUser.id,
+          {
+            connected: provider === 'spotify' ? true : state.linkedAccounts.spotify.isConnected,
+            username: provider === 'spotify' ? res.username : state.linkedAccounts.spotify.username
+          },
+          {
+            connected: provider === 'youtube' ? true : state.linkedAccounts.youtube.isConnected,
+            channel: provider === 'youtube' ? res.channelTitle : state.linkedAccounts.youtube.channelTitle
+          }
+        );
+      }
+    }
+  };
 
   const themeOptions: {
     id: ThemeMode;
@@ -204,8 +237,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#1DB954]/10 border border-[#1DB954]/30 flex items-center justify-center">
-                  <span className="w-4 h-4 rounded-full bg-[#1DB954]" />
+                <div className="w-10 h-10 rounded-xl bg-[#1DB954]/10 border border-[#1DB954]/30 flex items-center justify-center text-[#1DB954]">
+                  <SpotifyIcon className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
@@ -214,7 +247,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {state.linkedAccounts.spotify.isConnected
                       ? `@${state.linkedAccounts.spotify.username}`
-                      : 'Not connected'}
+                      : 'Browser session linking'}
                   </p>
                 </div>
               </div>
@@ -231,7 +264,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
             </div>
 
             <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-              <span className="text-[11px] text-zinc-400">Personal Playlists & Likes</span>
+              <span className="text-[11px] text-zinc-400">Personal Playlists & Drops</span>
               {state.linkedAccounts.spotify.isConnected ? (
                 <button
                   onClick={actions.disconnectSpotify}
@@ -242,10 +275,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
                 </button>
               ) : (
                 <button
-                  onClick={onOpenAccountModal}
-                  className="text-xs text-[#1DB954] hover:underline font-bold"
+                  disabled={isOAuthLoading !== null}
+                  onClick={() => handleBrowserOAuthConnect('spotify')}
+                  className="px-3 py-1.5 rounded-lg bg-[#1DB954] hover:bg-[#1ed760] text-black text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
                 >
-                  Connect Spotify
+                  <SpotifyIcon className="w-3.5 h-3.5" />
+                  <span>
+                    {isOAuthLoading === 'spotify' ? 'Connecting...' : 'Login with Spotify'}
+                  </span>
                 </button>
               )}
             </div>
@@ -255,8 +292,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FF0033]/10 border border-[#FF0033]/30 flex items-center justify-center">
-                  <span className="w-4 h-4 rounded-full bg-[#FF0033]" />
+                <div className="w-10 h-10 rounded-xl bg-[#FF0000]/10 border border-[#FF0000]/30 flex items-center justify-center text-[#FF0000]">
+                  <YouTubeIcon className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
@@ -265,24 +302,44 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onOpenAccountModal }
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {state.linkedAccounts.youtube.isConnected
                       ? `@${state.linkedAccounts.youtube.channelTitle}`
-                      : 'Ready for streaming'}
+                      : 'Browser session linking'}
                   </p>
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border bg-red-500/10 text-red-600 dark:text-[#FF0033] border-red-500/30">
-                ACTIVE STREAM
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border ${
+                  state.linkedAccounts.youtube.isConnected
+                    ? 'bg-red-500/10 text-red-600 dark:text-[#FF0000] border-red-500/30'
+                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 border-zinc-300 dark:border-zinc-700'
+                }`}
+              >
+                {state.linkedAccounts.youtube.isConnected ? 'CONNECTED' : 'DISCONNECTED'}
               </span>
             </div>
 
             <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
               <span className="text-[11px] text-zinc-400">Video Fallback & Streams</span>
-              <button
-                onClick={onOpenAccountModal}
-                className="text-xs text-zinc-700 dark:text-zinc-300 hover:underline font-bold"
-              >
-                Manage Stream
-              </button>
+              {state.linkedAccounts.youtube.isConnected ? (
+                <button
+                  onClick={actions.disconnectYouTube}
+                  className="text-xs text-red-500 hover:text-red-600 font-semibold flex items-center gap-1"
+                >
+                  <LogOut className="w-3 h-3" />
+                  Disconnect
+                </button>
+              ) : (
+                <button
+                  disabled={isOAuthLoading !== null}
+                  onClick={() => handleBrowserOAuthConnect('youtube')}
+                  className="px-3 py-1.5 rounded-lg bg-[#FF0000] hover:bg-[#ff1a1a] text-white text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
+                >
+                  <YouTubeIcon className="w-3.5 h-3.5" />
+                  <span>
+                    {isOAuthLoading === 'youtube' ? 'Connecting...' : 'Login with YouTube'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>

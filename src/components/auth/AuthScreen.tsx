@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { BrandLogo } from '../common/BrandLogo';
+import { SpotifyIcon, YouTubeIcon } from '../common/StreamingIcons';
+import { OAuthBrowserService } from '../../services/oauthBrowserService';
 
 export const AuthScreen: React.FC = () => {
   const { actions } = useMusicStore();
@@ -39,15 +41,67 @@ export const AuthScreen: React.FC = () => {
   const [enableSpotify, setEnableSpotify] = useState(true);
   const [spotifyUsername, setSpotifyUsername] = useState('');
   const [spotifyPassword, setSpotifyPassword] = useState('');
+  const [spotifyLinkedOAuth, setSpotifyLinkedOAuth] = useState(false);
 
   const [enableYouTube, setEnableYouTube] = useState(true);
   const [youtubeChannel, setYoutubeChannel] = useState('');
   const [youtubePassword, setYoutubePassword] = useState('');
+  const [youtubeLinkedOAuth, setYoutubeLinkedOAuth] = useState(false);
 
   // Status state
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isNotFound, setIsNotFound] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'spotify' | 'youtube' | null>(null);
+
+  // Direct Social Sign-In via Browser OAuth
+  const handleOAuthSocialLogin = async (provider: 'spotify' | 'youtube') => {
+    setErrorMsg(null);
+    setIsNotFound(false);
+    setOauthLoading(provider);
+
+    const res = await OAuthBrowserService.openOAuth(provider);
+    setOauthLoading(null);
+
+    if (res.success) {
+      const loginResult = actions.loginWithOAuth(provider, {
+        username: res.username,
+        channelTitle: res.channelTitle,
+        avatar: res.avatar,
+        email: res.email,
+        token: res.token
+      });
+
+      if (!loginResult.success) {
+        setErrorMsg(loginResult.error || 'Failed to authenticate via browser OAuth.');
+      }
+    } else if (res.error && !res.error.includes('closed') && !res.error.includes('cancelled')) {
+      setErrorMsg(res.error);
+    }
+  };
+
+  // Register Form OAuth Linking
+  const handleOAuthRegisterLink = async (provider: 'spotify' | 'youtube') => {
+    setOauthLoading(provider);
+    const res = await OAuthBrowserService.openOAuth(provider);
+    setOauthLoading(null);
+
+    if (res.success) {
+      if (provider === 'spotify') {
+        setEnableSpotify(true);
+        setSpotifyUsername(res.username || 'SpotifyUser');
+        setSpotifyPassword(res.token || 'oauth_connected');
+        setSpotifyLinkedOAuth(true);
+      } else {
+        setEnableYouTube(true);
+        setYoutubeChannel(res.channelTitle || 'YouTubeMusicUser');
+        setYoutubePassword(res.token || 'oauth_connected');
+        setYoutubeLinkedOAuth(true);
+      }
+    } else if (res.error && !res.error.includes('closed') && !res.error.includes('cancelled')) {
+      setErrorMsg(res.error);
+    }
+  };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,6 +390,44 @@ export const AuthScreen: React.FC = () => {
                   <span>One-Click Demo Sign In (demo@musily.app)</span>
                 </button>
               </div>
+
+              {/* Direct Browser OAuth Social Login Section */}
+              <div className="relative pt-3 pb-1">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-800" />
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-wider">
+                  <span className="bg-[#121217] px-3 text-zinc-500 font-bold">
+                    Or Browser Single Sign-On
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  disabled={oauthLoading !== null || isLoading}
+                  onClick={() => handleOAuthSocialLogin('spotify')}
+                  className="w-full py-2.5 px-3 rounded-xl bg-[#1DB954]/15 hover:bg-[#1DB954]/25 border border-[#1DB954]/35 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                >
+                  <SpotifyIcon className="w-4 h-4 text-[#1DB954] shrink-0" />
+                  <span>
+                    {oauthLoading === 'spotify' ? 'Connecting Browser...' : 'Login with Spotify'}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={oauthLoading !== null || isLoading}
+                  onClick={() => handleOAuthSocialLogin('youtube')}
+                  className="w-full py-2.5 px-3 rounded-xl bg-[#FF0000]/15 hover:bg-[#FF0000]/25 border border-[#FF0000]/35 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                >
+                  <YouTubeIcon className="w-4 h-4 text-[#FF0000] shrink-0" />
+                  <span>
+                    {oauthLoading === 'youtube' ? 'Connecting Browser...' : 'Login with YouTube'}
+                  </span>
+                </button>
+              </div>
             </form>
           )}
 
@@ -421,7 +513,7 @@ export const AuthScreen: React.FC = () => {
                 }`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#1DB954]" />
+                      <SpotifyIcon className="w-4 h-4 text-[#1DB954]" />
                       <span className="text-xs font-bold text-white">Connect Spotify</span>
                     </div>
                     <input
@@ -431,22 +523,60 @@ export const AuthScreen: React.FC = () => {
                       className="cursor-pointer accent-[#1DB954]"
                     />
                   </div>
+
                   {enableSpotify && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 animate-fade-in">
-                      <input
-                        type="text"
-                        value={spotifyUsername}
-                        onChange={(e) => setSpotifyUsername(e.target.value)}
-                        placeholder="Spotify Username / ID"
-                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
-                      />
-                      <input
-                        type="password"
-                        value={spotifyPassword}
-                        onChange={(e) => setSpotifyPassword(e.target.value)}
-                        placeholder="Spotify Password / Token"
-                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
-                      />
+                    <div className="space-y-2 pt-1 animate-fade-in">
+                      {spotifyLinkedOAuth ? (
+                        <div className="p-2.5 rounded-xl bg-[#1DB954]/15 border border-[#1DB954]/40 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-[#1DB954] shrink-0" />
+                            <span className="text-white font-medium">
+                              Linked via Browser Spotify: <strong className="text-[#1DB954]">@{spotifyUsername}</strong>
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSpotifyLinkedOAuth(false)}
+                            className="text-[11px] text-zinc-400 hover:text-white underline ml-2 shrink-0"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={oauthLoading !== null}
+                          onClick={() => handleOAuthRegisterLink('spotify')}
+                          className="w-full py-2.5 px-3 rounded-xl bg-[#1DB954] hover:bg-[#1ed760] text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                        >
+                          <SpotifyIcon className="w-4 h-4 shrink-0" />
+                          <span>
+                            {oauthLoading === 'spotify'
+                              ? 'Connecting Browser...'
+                              : 'Login with Spotify (Browser Auto-Connect)'}
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Manual / custom credentials fallback */}
+                      {!spotifyLinkedOAuth && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                          <input
+                            type="text"
+                            value={spotifyUsername}
+                            onChange={(e) => setSpotifyUsername(e.target.value)}
+                            placeholder="Or type Spotify Username"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
+                          />
+                          <input
+                            type="password"
+                            value={spotifyPassword}
+                            onChange={(e) => setSpotifyPassword(e.target.value)}
+                            placeholder="Spotify Password / Token"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -457,32 +587,70 @@ export const AuthScreen: React.FC = () => {
                 }`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#FF0033]" />
+                      <YouTubeIcon className="w-4 h-4 text-[#FF0000]" />
                       <span className="text-xs font-bold text-white">Connect YouTube Music</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={enableYouTube}
                       onChange={(e) => setEnableYouTube(e.target.checked)}
-                      className="cursor-pointer accent-[#FF0033]"
+                      className="cursor-pointer accent-[#FF0000]"
                     />
                   </div>
+
                   {enableYouTube && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 animate-fade-in">
-                      <input
-                        type="text"
-                        value={youtubeChannel}
-                        onChange={(e) => setYoutubeChannel(e.target.value)}
-                        placeholder="Channel / Google Email"
-                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0033]"
-                      />
-                      <input
-                        type="password"
-                        value={youtubePassword}
-                        onChange={(e) => setYoutubePassword(e.target.value)}
-                        placeholder="YouTube Password / Token"
-                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0033]"
-                      />
+                    <div className="space-y-2 pt-1 animate-fade-in">
+                      {youtubeLinkedOAuth ? (
+                        <div className="p-2.5 rounded-xl bg-[#FF0000]/15 border border-[#FF0000]/40 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-[#FF0000] shrink-0" />
+                            <span className="text-white font-medium">
+                              Linked via Browser YouTube: <strong className="text-red-400">@{youtubeChannel}</strong>
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setYoutubeLinkedOAuth(false)}
+                            className="text-[11px] text-zinc-400 hover:text-white underline ml-2 shrink-0"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={oauthLoading !== null}
+                          onClick={() => handleOAuthRegisterLink('youtube')}
+                          className="w-full py-2.5 px-3 rounded-xl bg-[#FF0000] hover:bg-[#ff1a1a] text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                        >
+                          <YouTubeIcon className="w-4 h-4 shrink-0" />
+                          <span>
+                            {oauthLoading === 'youtube'
+                              ? 'Connecting Browser...'
+                              : 'Login with YouTube (Browser Auto-Connect)'}
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Manual / custom credentials fallback */}
+                      {!youtubeLinkedOAuth && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                          <input
+                            type="text"
+                            value={youtubeChannel}
+                            onChange={(e) => setYoutubeChannel(e.target.value)}
+                            placeholder="Or type YouTube Channel"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
+                          />
+                          <input
+                            type="password"
+                            value={youtubePassword}
+                            onChange={(e) => setYoutubePassword(e.target.value)}
+                            placeholder="YouTube Password / Token"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
