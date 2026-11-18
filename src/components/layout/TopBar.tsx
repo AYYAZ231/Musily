@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Radio, User, Zap, Sun, Moon, Sparkles, Sliders, Settings } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
+import { BrandLogo } from '../common/BrandLogo';
 
 interface TopBarProps {
   onOpenPartyModal: () => void;
@@ -14,15 +15,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
     <header className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-8 py-3 bg-white/80 dark:bg-[#0C0C0F]/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200">
       {/* Mobile Brand Title */}
       <div
-        className="flex md:hidden items-center gap-2 cursor-pointer"
+        className="flex md:hidden items-center cursor-pointer"
         onClick={() => actions.setActiveTab('home')}
       >
-        <div className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] dark:bg-[#D4FF00]" />
-        </div>
-        <span className="font-display font-extrabold text-sm tracking-tight text-zinc-900 dark:text-white">
-          MUSILY
-        </span>
+        <BrandLogo size="sm" />
       </div>
 
       {/* Search Input Trigger */}

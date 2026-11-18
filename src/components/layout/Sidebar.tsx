@@ -2,6 +2,7 @@ import React from 'react';
 import { Compass, Search, Radio, Library, Settings, Sliders, Sparkles } from 'lucide-react';
 import { ActiveTab } from '../../types';
 import { useMusicStore } from '../../store/useMusicStore';
+import { BrandLogo } from '../common/BrandLogo';
 
 interface SidebarProps {
   onOpenAccountModal: () => void;
@@ -25,23 +26,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen pb-20 bg-white dark:bg-[#0C0C0F] border-r border-zinc-200 dark:border-zinc-800/80 p-4 select-none shrink-0 transition-colors duration-200">
+    <aside className="hidden md:flex flex-col w-64 h-screen pb-20 bg-white dark:bg-[#090A0E] border-r border-zinc-200/80 dark:border-zinc-800/80 p-4 select-none shrink-0 transition-colors duration-200">
       {/* Brand Header */}
       <div
-        className="flex items-center gap-2.5 px-2 mb-6 cursor-pointer"
+        className="px-2 mb-7 cursor-pointer"
         onClick={() => actions.setActiveTab('home')}
       >
-        <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-800 border border-zinc-700 flex items-center justify-center shadow-sm">
-          <span className="w-3 h-3 rounded-full bg-[#10B981] dark:bg-[#D4FF00]" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-base font-display font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            MUSILY
-          </span>
-          <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold border border-zinc-200 dark:border-zinc-700">
-            AUX
-          </span>
-        </div>
+        <BrandLogo size="md" />
       </div>
 
       {/* Main Nav Links */}

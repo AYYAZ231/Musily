@@ -32,23 +32,63 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
   if (!state.isPartyActive || !room) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center select-none">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center mb-5 shadow-sm">
-          <span className="w-5 h-5 rounded-full bg-[#10B981] dark:bg-[#D4FF00] animate-pulse" />
+      <div className="max-w-3xl mx-auto py-12 px-4 text-center select-none space-y-8 animate-fade-in">
+        <div className="relative inline-flex items-center justify-center">
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-emerald-500/30 to-[#D4FF00]/30 blur-2xl pointer-events-none" />
+          <div className="relative w-20 h-20 rounded-3xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-2xl">
+            <Radio className="w-10 h-10 text-emerald-400 dark:text-[#D4FF00]" />
+          </div>
         </div>
-        <h2 className="text-2xl font-display font-extrabold text-zinc-900 dark:text-white mb-2 tracking-tight">
-          THE AUX, HANDLED.
-        </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 max-w-sm text-xs mb-6 leading-relaxed">
-          Spin up a room to let Musily handle a continuous DJ-style set. Drop straight to the hooks, pass the Aux, and vote live with your friends online for free.
-        </p>
-        <button
-          onClick={() => actions.createParty('PartyHost')}
-          className="px-6 py-2.5 rounded-lg bg-[#10B981] hover:bg-[#059669] dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black font-bold text-xs shadow-sm transition-all active:scale-[0.98] flex items-center gap-2"
-        >
-          <Radio className="w-4 h-4" />
-          <span>Create Party Room</span>
-        </button>
+
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] border border-emerald-500/20 text-xs font-mono font-bold tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-ping" />
+            NAUX Protocol • Zero Cloud Fees
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-zinc-900 dark:text-white">
+            THE LIVE PARTY AUX.
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
+            Turn your music into a shared party deck. Synchronize live audio with friends online for free, skip to the drops, pass the virtual Aux cord, and vote what plays next.
+          </p>
+        </div>
+
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-1.5">
+            <Zap className="w-5 h-5 text-amber-500" />
+            <h3 className="text-xs font-bold text-zinc-900 dark:text-white">The Drop Mode</h3>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Jumps straight to the energetic chorus of every track. Zero dead air or slow intros.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-1.5">
+            <Radio className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
+            <h3 className="text-xs font-bold text-zinc-900 dark:text-white">Pass The Aux</h3>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Host can hand full DJ controls to any guest in the room with one click.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-1.5">
+            <Users className="w-5 h-5 text-blue-500" />
+            <h3 className="text-xs font-bold text-zinc-900 dark:text-white">Democratic Upvoting</h3>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Guests vote on queue items. Top-voted tracks automatically play next.
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <button
+            onClick={() => actions.createParty('PartyHost')}
+            className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 dark:from-[#D4FF00] dark:to-[#B6EB00] text-black font-extrabold text-sm shadow-xl transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-2.5"
+          >
+            <Radio className="w-4 h-4" />
+            <span>Launch Free Party Room</span>
+          </button>
+        </div>
       </div>
     );
   }
