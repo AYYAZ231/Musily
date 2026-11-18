@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Search, Radio, Library, Sun, Moon, Link as LinkIcon, Settings2 } from 'lucide-react';
+import { Compass, Search, Radio, Library, Settings, Sliders, Sparkles } from 'lucide-react';
 import { ActiveTab } from '../../types';
 import { useMusicStore } from '../../store/useMusicStore';
 
@@ -21,6 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
       isParty: true
     },
     { id: 'library', label: 'Your Library', icon: <Library className="w-4 h-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
   ];
 
   return (
@@ -78,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
       </div>
 
       {/* Party Mode Card (NAUX Style) */}
-      <div className="mb-6 p-3 rounded-xl bg-zinc-50 dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800">
+      <div className="mb-4 p-3 rounded-xl bg-zinc-50 dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
             Party Mode
@@ -87,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
         </div>
         <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-3 leading-relaxed">
           {state.isPartyActive
-            ? `Room active: ${state.partyRoom?.id}`
+            ? `Room active: #${state.partyRoom?.id}`
             : 'Pass the Aux cord, drop to the hook, and sync live with friends.'}
         </p>
         <button
@@ -99,74 +100,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
         </button>
       </div>
 
-      {/* Connected Accounts */}
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center justify-between px-2.5 mb-2">
-          <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-            Sources
-          </span>
-          <button
-            onClick={onOpenAccountModal}
-            className="text-[11px] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-          >
-            Manage
-          </button>
+      {/* Quick Acoustic Studio EQ Card */}
+      <div className="flex-1 mb-4">
+        <div
+          onClick={() => actions.toggleEqualizerModal(true)}
+          className="p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 dark:bg-[#121216] dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 cursor-pointer transition-all group"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[11px] font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+              <Sliders className="w-3.5 h-3.5 text-emerald-500 dark:text-[#D4FF00]" />
+              Acoustic Studio
+            </span>
+            <span className="text-[10px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold">
+              EQ
+            </span>
+          </div>
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            10-band equalizer & AI sound tuning active.
+          </p>
         </div>
-
-        <button
-          onClick={onOpenAccountModal}
-          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors text-left"
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[#1DB954]" />
-            <span className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">Spotify</span>
-          </div>
-          <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
-            {state.linkedAccounts.spotify.isConnected ? 'Connected' : 'Link'}
-          </span>
-        </button>
-
-        <button
-          onClick={onOpenAccountModal}
-          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors text-left"
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[#FF0033]" />
-            <span className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">YouTube Music</span>
-          </div>
-          <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
-            {state.linkedAccounts.youtube.isConnected ? 'Connected' : 'Ready'}
-          </span>
-        </button>
       </div>
 
-      {/* Footer Profile & Theme Toggle */}
+      {/* Footer Profile & Settings Shortcut */}
       <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-900 dark:text-white shrink-0">
+        <div
+          onClick={() => actions.setActiveTab('settings')}
+          className="flex items-center gap-2.5 min-w-0 cursor-pointer group flex-1"
+        >
+          <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-900 dark:text-white shrink-0 group-hover:border-zinc-500 transition-colors">
             {state.linkedAccounts.spotify.username?.charAt(0) || 'U'}
           </div>
           <div className="min-w-0 truncate">
-            <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
-              {state.linkedAccounts.spotify.username || 'Local Host'}
+            <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate group-hover:underline">
+              {state.linkedAccounts.spotify.username || 'Musily User'}
             </p>
-            <p className="text-[10px] text-zinc-400 truncate font-mono">Free Online</p>
+            <p className="text-[10px] text-zinc-400 truncate font-mono">Preferences</p>
           </div>
         </div>
 
-        {/* Theme Toggle Button */}
+        {/* Settings button */}
         <button
-          onClick={actions.toggleTheme}
-          className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          title={`Switch to ${state.theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          onClick={() => actions.setActiveTab('settings')}
+          className={`p-1.5 rounded-lg transition-colors ${
+            state.activeTab === 'settings'
+              ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+              : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          }`}
+          title="Open Settings"
         >
-          {state.theme === 'dark' ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-zinc-600" />
-          )}
+          <Settings className="w-4 h-4" />
         </button>
       </div>
     </aside>
   );
 };
+

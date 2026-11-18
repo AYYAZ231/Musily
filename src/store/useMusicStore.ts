@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode } from '../types';
+import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode, EqualizerBands, EqualizerSettings } from '../types';
 import { AudioPlayer } from '../services/audioPlayer';
 import { PartyP2PService, PartyMessage } from '../services/partyP2PService';
 import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../services/spotifyService';
 import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from '../services/youtubeService';
+import { DEFAULT_EQUALIZER_BANDS, EQUALIZER_PRESETS, AIAudioService } from '../services/aiAudioService';
 import confetti from 'canvas-confetti';
 
 interface MusicStoreState {
@@ -25,6 +26,8 @@ interface MusicStoreState {
   dropMode: boolean;
   theme: ThemeMode;
   linkedAccounts: LinkedAccounts;
+  equalizer: EqualizerSettings;
+  isEqualizerOpen: boolean;
 }
 
 const INITIAL_QUEUE: Track[] = [
@@ -37,9 +40,40 @@ const INITIAL_QUEUE: Track[] = [
 const getInitialTheme = (): ThemeMode => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('musily_theme');
-    if (saved === 'light' || saved === 'dark') return saved;
+    if (saved === 'light' || saved === 'dark' || saved === 'glass') return saved;
   }
   return 'dark';
+};
+
+const getInitialEqualizer = (): EqualizerSettings => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('musily_equalizer');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+  }
+  return {
+    isEnabled: true,
+    preamp: 0,
+    bassBoost: 3,
+    spatialAudio: 'studio',
+    bands: { ...DEFAULT_EQUALIZER_BANDS },
+    preset: 'flat',
+    aiAutoOptimize: false,
+    aiLastPrompt: '',
+    aiLastInsight: 'AI Acoustic Engine ready. Type any sound vibe or select a preset.'
+  };
+};
+
+const applyThemeToDOM = (theme: ThemeMode) => {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  root.classList.remove('dark', 'glass');
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else if (theme === 'glass') {
+    root.classList.add('dark', 'glass');
+  }
 };
 
 // Singleton in-memory state
@@ -61,6 +95,8 @@ let globalState: MusicStoreState = {
   isFullPlayerOpen: false,
   dropMode: false,
   theme: getInitialTheme(),
+  equalizer: getInitialEqualizer(),
+  isEqualizerOpen: false,
   linkedAccounts: {
     spotify: {
       isConnected: SpotifyService.isConnected(),
@@ -97,13 +133,7 @@ export function useMusicStore() {
 
   useEffect(() => {
     // Apply theme to DOM on mount
-    if (typeof document !== 'undefined') {
-      if (globalState.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
+    applyThemeToDOM(globalState.theme);
 
     const unsubPlayer = player.subscribe(({ isPlaying, currentTime, duration, track }) => {
       updateState({
@@ -294,20 +324,155 @@ export function useMusicStore() {
     });
   };
 
+  const saveEqualizerToStorage = (eq: EqualizerSettings) => {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('musily_equalizer', JSON.stringify(eq));
+      } catch {}
+    }
+  };
+
   const actions = {
-    toggleTheme: () => {
-      const nextTheme: ThemeMode = globalState.theme === 'dark' ? 'light' : 'dark';
-      if (typeof document !== 'undefined') {
-        if (nextTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      }
+    setTheme: (theme: ThemeMode) => {
+      applyThemeToDOM(theme);
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('musily_theme', nextTheme);
+        localStorage.setItem('musily_theme', theme);
       }
-      updateState({ theme: nextTheme });
+      updateState({ theme });
+    },
+
+    toggleTheme: () => {
+      const nextTheme: ThemeMode =
+        globalState.theme === 'dark' ? 'light' :
+        globalState.theme === 'light' ? 'glass' : 'dark';
+      actions.setTheme(nextTheme);
+    },
+
+    toggleEqualizerModal: (open?: boolean) => {
+      const nextOpen = open !== undefined ? open : !globalState.isEqualizerOpen;
+      updateState({ isEqualizerOpen: nextOpen });
+    },
+
+    toggleEqualizerEnabled: () => {
+      const nextState = {
+        ...globalState.equalizer,
+        isEnabled: !globalState.equalizer.isEnabled
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    setEqualizerBands: (bands: Partial<EqualizerBands>) => {
+      const updatedBands = { ...globalState.equalizer.bands, ...bands };
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        bands: updatedBands,
+        preset: 'custom'
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    setEqualizerPreamp: (preamp: number) => {
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        preamp
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    setEqualizerBassBoost: (boost: number) => {
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        bassBoost: boost
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    setEqualizerSpatial: (spatial: 'off' | 'studio' | 'concert' | 'binaural') => {
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        spatialAudio: spatial
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    applyEqualizerPreset: (presetKey: string) => {
+      const preset = EQUALIZER_PRESETS[presetKey];
+      if (!preset) return;
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        bands: { ...preset.bands },
+        preamp: preset.preamp,
+        bassBoost: preset.bassBoost,
+        spatialAudio: preset.spatial,
+        preset: presetKey,
+        aiLastInsight: `Applied ${preset.name}: ${preset.description}`
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+    },
+
+    applyAIAudioPrompt: (prompt: string) => {
+      const result = AIAudioService.processAIPrompt(prompt);
+      const nextState: EqualizerSettings = {
+        ...globalState.equalizer,
+        bands: result.bands,
+        preamp: result.preamp,
+        bassBoost: result.bassBoost,
+        spatialAudio: result.spatial,
+        preset: 'ai_custom',
+        aiLastPrompt: prompt,
+        aiLastInsight: result.insight
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
+      return { success: true, insight: result.insight };
+    },
+
+    toggleAIAudioOptimization: () => {
+      const nextAuto = !globalState.equalizer.aiAutoOptimize;
+      if (nextAuto && globalState.currentTrack) {
+        const auto = AIAudioService.getTrackAutoMaster(globalState.currentTrack);
+        const nextState: EqualizerSettings = {
+          ...globalState.equalizer,
+          aiAutoOptimize: true,
+          bands: auto.bands,
+          preamp: auto.preamp,
+          bassBoost: auto.bassBoost,
+          spatialAudio: auto.spatial,
+          preset: 'ai_auto',
+          aiLastInsight: auto.insight
+        };
+        saveEqualizerToStorage(nextState);
+        updateState({ equalizer: nextState });
+      } else {
+        const nextState: EqualizerSettings = {
+          ...globalState.equalizer,
+          aiAutoOptimize: false
+        };
+        saveEqualizerToStorage(nextState);
+        updateState({ equalizer: nextState });
+      }
+    },
+
+    resetEqualizer: () => {
+      const nextState: EqualizerSettings = {
+        isEnabled: true,
+        preamp: 0,
+        bassBoost: 3,
+        spatialAudio: 'studio',
+        bands: { ...DEFAULT_EQUALIZER_BANDS },
+        preset: 'flat',
+        aiAutoOptimize: false,
+        aiLastPrompt: '',
+        aiLastInsight: 'Equalizer reset to Pure Studio flat response.'
+      };
+      saveEqualizerToStorage(nextState);
+      updateState({ equalizer: nextState });
     },
 
     setActiveTab: (tab: ActiveTab) => updateState({ activeTab: tab }),

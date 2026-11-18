@@ -7,11 +7,13 @@ import { HomeView } from './components/home/HomeView';
 import { UnifiedSearch } from './components/search/UnifiedSearch';
 import { PartyRoomView } from './components/party/PartyRoomView';
 import { PlaylistsView } from './components/library/PlaylistsView';
+import { SettingsView } from './components/settings/SettingsView';
 import { FloatingReactions } from './components/party/FloatingReactions';
 import { JoinCreateModal } from './components/party/JoinCreateModal';
 import { PassAuxModal } from './components/party/PassAuxModal';
 import { AccountLinkModal } from './components/library/AccountLinkModal';
 import { FullPlayerModal } from './components/player/FullPlayerModal';
+import { EqualizerModal } from './components/player/EqualizerModal';
 import { useMusicStore } from './store/useMusicStore';
 
 export const App: React.FC = () => {
@@ -30,8 +32,12 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  const isGlass = state.theme === 'glass';
+
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#F8F9FA] dark:bg-[#09090B] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
+    <div className={`flex h-screen w-screen overflow-hidden ${
+      isGlass ? 'bg-transparent text-white' : 'bg-[#F8F9FA] dark:bg-[#09090B] text-zinc-900 dark:text-zinc-100'
+    } transition-colors duration-200`}>
       {/* Floating Reaction Bursts */}
       <FloatingReactions />
 
@@ -68,6 +74,10 @@ export const App: React.FC = () => {
           {state.activeTab === 'library' && (
             <PlaylistsView onOpenAccountModal={() => setAccountModalOpen(true)} />
           )}
+
+          {state.activeTab === 'settings' && (
+            <SettingsView onOpenAccountModal={() => setAccountModalOpen(true)} />
+          )}
         </main>
 
         {/* Bottom Navigation for Mobile / APK */}
@@ -94,6 +104,7 @@ export const App: React.FC = () => {
       />
 
       <FullPlayerModal />
+      <EqualizerModal />
     </div>
   );
 };

@@ -8,7 +8,8 @@ import {
   VolumeX,
   Maximize2,
   Zap,
-  Radio
+  Radio,
+  Sliders
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { EqualizerBars } from '../common/EqualizerBars';
@@ -34,7 +35,7 @@ export const PlayerBar: React.FC = () => {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
+    <footer className="player-bar-container fixed bottom-0 left-0 right-0 z-30 mb-[56px] md:mb-0 bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 py-2.5 transition-colors duration-200 select-none shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Track Information */}
         <div
@@ -179,6 +180,20 @@ export const PlayerBar: React.FC = () => {
               className="w-20"
             />
           </div>
+
+          {/* Equalizer & AI Acoustic Button */}
+          <button
+            onClick={() => actions.toggleEqualizerModal()}
+            className={`p-1.5 rounded-lg transition-all active:scale-90 flex items-center gap-1 ${
+              state.isEqualizerOpen
+                ? 'bg-emerald-500/15 text-emerald-600 dark:bg-[#D4FF00]/15 dark:text-[#D4FF00]'
+                : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }`}
+            title="Acoustic Equalizer & AI Sound Engine"
+          >
+            <Sliders className="w-4 h-4" />
+            <span className="hidden xl:inline text-[10px] font-mono font-bold">EQ</span>
+          </button>
 
           {/* Full Player Modal Button */}
           <button

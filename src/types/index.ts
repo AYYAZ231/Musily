@@ -1,5 +1,30 @@
 export type MusicSource = 'spotify' | 'youtube' | 'local';
-export type ThemeMode = 'dark' | 'light';
+export type ThemeMode = 'dark' | 'light' | 'glass';
+
+export interface EqualizerBands {
+  b32: number;   // 32 Hz (Sub-Bass)
+  b64: number;   // 64 Hz (Bass)
+  b125: number;  // 125 Hz (Low-Mid / Kick punch)
+  b250: number;  // 250 Hz (Warmth)
+  b500: number;  // 500 Hz (Body)
+  b1k: number;   // 1 kHz (Lead / Vocals)
+  b2k: number;   // 2 kHz (Vocal presence)
+  b4k: number;   // 4 kHz (Attack / Clarity)
+  b8k: number;   // 8 kHz (Cymbals / Sparkle)
+  b16k: number;  // 16 kHz (Air / Brilliance)
+}
+
+export interface EqualizerSettings {
+  isEnabled: boolean;
+  preamp: number; // dB (-12 to +12)
+  bassBoost: number; // 0 to 10
+  spatialAudio: 'off' | 'studio' | 'concert' | 'binaural';
+  bands: EqualizerBands;
+  preset: string;
+  aiAutoOptimize: boolean;
+  aiLastPrompt?: string;
+  aiLastInsight?: string;
+}
 
 export interface Track {
   id: string;

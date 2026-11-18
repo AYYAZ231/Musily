@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Search, Radio, Library } from 'lucide-react';
+import { Compass, Search, Radio, Library, Settings } from 'lucide-react';
 import { ActiveTab } from '../../types';
 import { useMusicStore } from '../../store/useMusicStore';
 
@@ -16,6 +16,7 @@ export const BottomNav: React.FC = () => {
       isParty: true
     },
     { id: 'library', label: 'Library', icon: <Library className="w-4 h-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
   ];
 
   return (

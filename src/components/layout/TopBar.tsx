@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Radio, User, Zap, Sun, Moon } from 'lucide-react';
+import { Search, Radio, User, Zap, Sun, Moon, Sparkles, Sliders, Settings } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 
 interface TopBarProps {
@@ -31,24 +31,36 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
         className="hidden sm:flex items-center gap-2.5 w-80 lg:w-96 px-3.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all text-xs"
       >
         <Search className="w-3.5 h-3.5 text-zinc-400" />
-        <span className="flex-1">Search Spotify, YouTube Music, artists...</span>
+        <span className="flex-1">Search music, artists, genres...</span>
         <kbd className="text-[10px] font-mono bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 shadow-sm">
           ⌘K
         </kbd>
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Dark / Light Theme Toggle Button */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Equalizer & AI Studio Quick Button */}
+        <button
+          onClick={() => actions.toggleEqualizerModal(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all text-xs font-semibold"
+          title="Acoustic Equalizer & AI Sound Engine"
+        >
+          <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-[#D4FF00]" />
+          <span className="hidden sm:inline">EQ</span>
+        </button>
+
+        {/* Theme Quick Cycle Button (Dark -> Light -> Liquid Glass) */}
         <button
           onClick={actions.toggleTheme}
           className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all"
-          title={`Switch to ${state.theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          title={`Active Theme: ${state.theme}. Click to switch theme.`}
         >
           {state.theme === 'dark' ? (
             <Sun className="w-4 h-4 text-amber-400" />
+          ) : state.theme === 'light' ? (
+            <Sparkles className="w-4 h-4 text-sky-400" />
           ) : (
-            <Moon className="w-4 h-4 text-zinc-700" />
+            <Moon className="w-4 h-4 text-zinc-300" />
           )}
         </button>
 
@@ -87,13 +99,17 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenPartyModal, onOpenAccountM
           </button>
         )}
 
-        {/* User Profile */}
+        {/* Settings Button */}
         <button
-          onClick={onOpenAccountModal}
-          className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 flex items-center justify-center text-zinc-700 dark:text-zinc-300 transition-all text-xs font-bold"
-          title="Manage Accounts"
+          onClick={() => actions.setActiveTab('settings')}
+          className={`p-2 rounded-lg border transition-all ${
+            state.activeTab === 'settings'
+              ? 'bg-zinc-200 dark:bg-zinc-800 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white'
+              : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
+          }`}
+          title="Settings, Themes & Accounts"
         >
-          {state.linkedAccounts.spotify.username?.charAt(0) || <User className="w-3.5 h-3.5" />}
+          <Settings className="w-4 h-4" />
         </button>
       </div>
     </header>
