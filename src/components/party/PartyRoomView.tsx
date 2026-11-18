@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import {
   Radio,
-  Flame,
   Copy,
   Check,
   Share2,
   Users,
   MessageSquare,
-  Sparkles,
-  ArrowUp,
+  Zap,
+  ChevronUp,
   Disc,
   Send,
   LogOut,
-  Award,
-  Music2
+  Sliders,
+  Plus
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
-import { Track } from '../../types';
 
 interface PartyRoomViewProps {
   onOpenPassAux: () => void;
@@ -33,22 +31,22 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
 
   if (!state.isPartyActive || !room) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-party-pink to-primary flex items-center justify-center shadow-glow-party mb-6 animate-pulse">
-          <Flame className="w-10 h-10 text-white fill-white" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center select-none">
+        <div className="w-16 h-16 rounded-2xl bg-ink-900 border border-ink-800 flex items-center justify-center mb-5">
+          <span className="w-5 h-5 rounded-full bg-lime animate-pulse" />
         </div>
-        <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-3">
-          Party Mode (NAUX Aux)
+        <h2 className="text-2xl font-display font-extrabold text-white mb-2 tracking-tight">
+          THE AUX, HANDLED.
         </h2>
-        <p className="text-slate-400 max-w-md text-sm mb-6 leading-relaxed">
-          Create or join a synchronized party room. Just like <strong>naux.party</strong>, anyone can pass the Aux, drop straight to the chorus, upvote bangers, and vibe together in real-time online for free!
+        <p className="text-zinc-400 max-w-sm text-xs mb-6 leading-relaxed">
+          Spin up a room to let Musily handle a continuous DJ-style set. Drop straight to the hooks, pass the Aux, and vote live with your friends online for free.
         </p>
         <button
           onClick={() => actions.createParty('PartyHost')}
-          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-party-pink via-primary to-party-cyan text-white font-bold text-sm shadow-glow-party hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+          className="px-6 py-2.5 rounded-lg bg-lime hover:bg-lime-hover text-black font-bold text-xs shadow-subtle transition-all active:scale-[0.98] flex items-center gap-2"
         >
           <Radio className="w-4 h-4" />
-          Create a New Party Room
+          <span>Create Party Room</span>
         </button>
       </div>
     );
@@ -69,51 +67,35 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
   };
 
   const currentAuxOwner = room.participants.find((p) => p.id === room.auxOwnerId);
-
-  const emojis = ['🔥', '🎉', '🔊', '❤️', '💃', '⚡'];
+  const emojis = ['🔥', '🔊', '🎉', '❤️', '💃', '⚡'];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-24">
-      {/* Top Party Hero Banner (Glassmorphism & Neon) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1A0E2A]/90 via-surface/90 to-[#0A1628]/90 border border-party-pink/30 p-6 md:p-8 shadow-glow-party">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-party-pink/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none">
+      {/* Top Deck Room Banner */}
+      <div className="p-5 md:p-6 rounded-2xl bg-ink-900 border border-ink-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-party-pink/20 border border-party-pink text-party-pink text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-party-pink animate-ping" />
-                Live Party Room
+              <span className="text-[11px] font-mono text-lime flex items-center gap-1 font-bold">
+                <span className="w-2 h-2 rounded-full bg-lime animate-ping" />
+                ROOM LIVE
               </span>
-              <span className="text-xs text-slate-400">
-                Inspired by <strong>naux.party</strong>
+              <span className="text-zinc-600">·</span>
+              <span className="text-xs font-mono text-zinc-400 uppercase">
+                CODE: <strong className="text-white">{room.id}</strong>
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-display font-extrabold text-white tracking-tight">
-              {room.name}
-            </h1>
-
-            {/* Aux Holder Badge */}
-            <div className="flex items-center gap-2 pt-1">
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-surface-elevated/80 border border-white/10 text-xs">
-                <Award className="w-4 h-4 text-party-yellow" />
-                <span className="text-slate-400">Current Aux Holder:</span>
-                <span className="font-bold text-white">
-                  {currentAuxOwner ? currentAuxOwner.name : 'Party Host'}
-                </span>
-                {state.hasAux && (
-                  <span className="ml-1 text-[10px] bg-party-pink text-white font-bold px-1.5 py-0.2 rounded-full">
-                    YOU
-                  </span>
-                )}
-              </div>
-
+            <div className="flex items-center gap-2 pt-0.5">
+              <span className="text-xs text-zinc-400">The Aux is with:</span>
+              <span className="text-xs font-bold text-white bg-ink-800 px-2 py-0.5 rounded border border-ink-700">
+                {currentAuxOwner ? currentAuxOwner.name : 'Host'}
+                {state.hasAux && ' (You)'}
+              </span>
               {state.isHost && (
                 <button
                   onClick={onOpenPassAux}
-                  className="text-xs text-primary-light hover:text-white underline font-semibold transition-colors"
+                  className="text-xs text-lime hover:underline font-semibold ml-1"
                 >
                   Pass Aux ➔
                 </button>
@@ -121,231 +103,185 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
             </div>
           </div>
 
-          {/* Room Code & Quick Actions */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
-              <div>
-                <span className="block text-[10px] text-slate-400 uppercase font-bold tracking-wider">
-                  Room Code
-                </span>
-                <span className="font-mono text-xl font-bold tracking-widest text-party-cyan">
-                  {room.id}
-                </span>
-              </div>
-              <button
-                onClick={handleCopyLink}
-                className="p-2 ml-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
-                title="Copy Invite Link"
-              >
-                {copied ? <Check className="w-4 h-4 text-spotify" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-
+          {/* Quick Room Actions */}
+          <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-party-pink to-primary text-white text-xs font-bold shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+              className="px-3 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-white text-xs font-medium border border-ink-700 flex items-center gap-1.5 transition-colors"
             >
-              <Share2 className="w-4 h-4" />
-              <span>{copied ? 'Link Copied!' : 'Share Room'}</span>
+              {copied ? <Check className="w-3.5 h-3.5 text-lime" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Link Copied' : 'Share Link'}</span>
+            </button>
+
+            <button
+              onClick={actions.toggleDropMode}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1.5 ${
+                state.dropMode
+                  ? 'bg-lime text-black border-lime font-bold'
+                  : 'bg-ink-800 border-ink-700 text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Drop Mode: {state.dropMode ? 'ON' : 'OFF'}</span>
             </button>
 
             <button
               onClick={actions.leaveParty}
-              className="p-2.5 rounded-2xl bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-slate-400 border border-white/10 transition-colors"
+              className="p-2 rounded-lg bg-ink-800 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-ink-700 transition-colors"
               title="Leave Room"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Live Reaction Emojis Bar (Real-Time Burst like NAUX) */}
-        <div className="relative z-10 mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+        {/* Reaction Bar */}
+        <div className="mt-4 pt-4 border-t border-ink-800 flex items-center justify-between gap-3">
+          <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">
+            Reactions:
+          </span>
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-party-pink" />
-            <span className="text-xs font-bold text-white uppercase tracking-wider">
-              Send Live Burst:
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
             {emojis.map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => actions.sendReaction(emoji)}
-                className="text-2xl p-2 rounded-2xl bg-white/5 hover:bg-white/15 hover:scale-125 active:scale-90 transition-transform duration-200 shadow-sm"
+                className="text-lg p-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 transition-transform active:scale-90"
               >
                 {emoji}
               </button>
             ))}
           </div>
-
-          {/* The Drop Mode Switcher */}
-          <button
-            onClick={actions.toggleDropMode}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all ${
-              state.dropMode
-                ? 'bg-party-yellow/20 border-party-yellow text-party-yellow shadow-glow-party'
-                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>The Drop Mode: {state.dropMode ? 'ON' : 'OFF'}</span>
-          </button>
         </div>
       </div>
 
-      {/* Navigation Tabs (Queue / Chat / Members) */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-ink-800 pb-2">
         <button
           onClick={() => setActiveTab('queue')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'queue'
-              ? 'bg-primary/20 text-white border border-primary/30 shadow-glow-primary'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-ink-800 text-white'
+              : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
-          <Music2 className="w-4 h-4" />
-          <span>Party Queue ({room.queue.length})</span>
+          Party Queue ({room.queue.length})
         </button>
 
         <button
           onClick={() => setActiveTab('chat')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'chat'
-              ? 'bg-primary/20 text-white border border-primary/30 shadow-glow-primary'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-ink-800 text-white'
+              : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
-          <MessageSquare className="w-4 h-4" />
-          <span>Party Chat ({state.chatMessages.length})</span>
+          Chat ({state.chatMessages.length})
         </button>
 
         <button
           onClick={() => setActiveTab('members')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'members'
-              ? 'bg-primary/20 text-white border border-primary/30 shadow-glow-primary'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-ink-800 text-white'
+              : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
-          <Users className="w-4 h-4" />
-          <span>Vibers ({room.participants.length})</span>
+          Listeners ({room.participants.length})
         </button>
 
-        <div className="ml-auto">
-          <button
-            onClick={onOpenSearch}
-            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
-          >
-            <span>+ Suggest Track</span>
-          </button>
-        </div>
+        <button
+          onClick={onOpenSearch}
+          className="ml-auto px-3 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-white text-xs font-semibold flex items-center gap-1 border border-ink-700 transition-all"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add Song</span>
+        </button>
       </div>
 
-      {/* Tab 1: Democratic Queue */}
+      {/* Queue View */}
       {activeTab === 'queue' && (
-        <div className="space-y-4">
-          {/* Now Playing in Party */}
+        <div className="space-y-3">
+          {/* Active Now Playing */}
           {state.currentTrack && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-party-pink/15 via-primary/10 to-transparent border border-party-pink/30 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-ink-900 border border-ink-700 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-14 h-14 rounded-xl overflow-hidden relative shadow-lg shrink-0">
-                  <img
-                    src={state.currentTrack.coverUrl}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <Disc className="w-6 h-6 text-white animate-spin-slow" />
-                  </div>
-                </div>
-
+                <img
+                  src={state.currentTrack.coverUrl}
+                  alt=""
+                  className="w-12 h-12 rounded-lg object-cover shrink-0 bg-ink-800"
+                />
                 <div className="min-w-0">
-                  <span className="text-[10px] text-party-pink uppercase font-extrabold tracking-wider">
-                    NOW PLAYING ON THE AUX
+                  <span className="text-[10px] font-mono uppercase text-lime font-bold">
+                    ON THE AUX RIGHT NOW
                   </span>
-                  <h4 className="text-base font-bold text-white truncate">
+                  <h4 className="text-sm font-bold text-white truncate">
                     {state.currentTrack.title}
                   </h4>
-                  <p className="text-xs text-slate-400 truncate">{state.currentTrack.artist}</p>
+                  <p className="text-xs text-zinc-400 truncate">{state.currentTrack.artist}</p>
                 </div>
               </div>
 
-              <span className="text-xs px-2.5 py-1 rounded-full bg-party-pink/20 text-party-pink font-bold border border-party-pink/30 shrink-0">
-                {state.currentTrack.votes} Upvotes
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-mono text-zinc-400">
+                  {state.currentTrack.votes} votes
+                </span>
+              </div>
             </div>
           )}
 
-          {/* Up Next List */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2">
-              Democratic Queue (Top Voted Plays Next)
-            </h3>
+          {/* Up Next / Democratic Queue */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono text-zinc-500 uppercase px-1">
+              Up Next (Voted songs play first)
+            </span>
 
             {room.queue.length === 0 ? (
-              <div className="p-8 text-center rounded-2xl bg-surface/40 border border-white/5">
-                <p className="text-sm text-slate-400 mb-3">No songs in queue yet!</p>
+              <div className="p-8 text-center rounded-xl bg-ink-900 border border-ink-800">
+                <p className="text-xs text-zinc-400 mb-3">The queue is empty.</p>
                 <button
                   onClick={onOpenSearch}
-                  className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors"
+                  className="px-4 py-2 rounded-lg bg-lime hover:bg-lime-hover text-black text-xs font-bold transition-all"
                 >
-                  Add Songs from Spotify & YouTube
+                  Suggest Songs from Spotify / YouTube
                 </button>
               </div>
             ) : (
               room.queue.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-surface/60 hover:bg-surface border border-white/5 transition-all group"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-ink-900 hover:bg-ink-850 border border-ink-800 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs font-bold text-slate-500 w-4 text-center">
-                      #{idx + 1}
+                    <span className="text-xs font-mono text-zinc-500 w-4 text-center">
+                      {idx + 1}
                     </span>
                     <img
                       src={t.coverUrl}
                       alt=""
-                      className="w-11 h-11 rounded-lg object-cover shadow shrink-0"
+                      className="w-9 h-9 rounded object-cover shrink-0 bg-ink-800"
                     />
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-semibold text-white truncate">
-                          {t.title}
-                        </span>
-                        <span
-                          className={`text-[9px] px-1 rounded font-bold uppercase ${
-                            t.source === 'spotify'
-                              ? 'text-spotify bg-spotify/10'
-                              : 'text-youtube bg-youtube/10'
-                          }`}
-                        >
-                          {t.source}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 truncate">{t.artist}</p>
+                      <p className="text-xs font-semibold text-white truncate">{t.title}</p>
+                      <p className="text-[11px] text-zinc-400 truncate">{t.artist}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    {/* Upvote Button */}
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => actions.voteTrack(t.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-party-pink/20 hover:text-party-pink text-slate-300 font-bold text-xs border border-white/5 transition-all active:scale-95"
-                      title="Upvote to play sooner!"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-ink-800 hover:bg-ink-700 text-white text-xs font-mono font-bold border border-ink-700 transition-all active:scale-95"
+                      title="Vote up"
                     >
-                      <ArrowUp className="w-3.5 h-3.5" />
+                      <ChevronUp className="w-3.5 h-3.5 text-lime" />
                       <span>{t.votes}</span>
                     </button>
 
-                    {/* Aux holder can play immediately */}
                     {state.hasAux && (
                       <button
                         onClick={() => actions.playTrack(t)}
-                        className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-primary text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-all"
+                        className="px-2.5 py-1 rounded bg-white hover:bg-zinc-200 text-black text-xs font-semibold"
                       >
-                        Play Now
+                        Play
                       </button>
                     )}
                   </div>
@@ -356,78 +292,68 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
         </div>
       )}
 
-      {/* Tab 2: Live Room Chat */}
+      {/* Chat View */}
       {activeTab === 'chat' && (
-        <div className="rounded-3xl bg-surface/60 border border-white/5 p-4 flex flex-col h-96">
-          <div className="flex-1 overflow-y-auto space-y-3 p-2">
+        <div className="rounded-xl bg-ink-900 border border-ink-800 p-4 flex flex-col h-80">
+          <div className="flex-1 overflow-y-auto space-y-2.5 p-1">
             {state.chatMessages.length === 0 ? (
-              <div className="text-center text-xs text-slate-500 py-12">
-                No chat messages yet. Start the conversation!
+              <div className="text-center text-xs text-zinc-500 py-12">
+                No messages yet. Drop a comment for the DJ.
               </div>
             ) : (
               state.chatMessages.map((msg) => (
-                <div key={msg.id} className="flex flex-col space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-party-pink">{msg.senderName}</span>
-                    <span className="text-[10px] text-slate-500">
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-200 bg-white/5 px-3 py-1.5 rounded-xl max-w-lg self-start">
-                    {msg.text}
-                  </p>
+                <div key={msg.id} className="text-xs">
+                  <span className="font-bold text-white mr-2">{msg.senderName}:</span>
+                  <span className="text-zinc-300">{msg.text}</span>
                 </div>
               ))
             )}
           </div>
 
-          <form onSubmit={handleSendChat} className="flex items-center gap-2 pt-3 border-t border-white/5">
+          <form onSubmit={handleSendChat} className="flex items-center gap-2 pt-3 border-t border-ink-800">
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Drop a comment or request a track..."
-              className="flex-1 px-4 py-2.5 rounded-xl bg-surface-elevated/70 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-primary"
+              placeholder="Type a message or track request..."
+              className="flex-1 px-3 py-2 rounded-lg bg-ink-850 border border-ink-700 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-lime"
             />
             <button
               type="submit"
-              className="p-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white transition-colors"
+              className="px-3.5 py-2 rounded-lg bg-lime hover:bg-lime-hover text-black font-semibold text-xs transition-colors"
             >
-              <Send className="w-4 h-4" />
+              Send
             </button>
           </form>
         </div>
       )}
 
-      {/* Tab 3: Party Members */}
+      {/* Members View */}
       {activeTab === 'members' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {room.participants.map((p) => (
             <div
               key={p.id}
-              className="p-4 rounded-2xl bg-surface/60 border border-white/5 flex items-center justify-between"
+              className="p-3 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-between"
             >
-              <div className="flex items-center gap-3">
-                <img src={p.avatar} alt="" className="w-10 h-10 rounded-full bg-surface" />
-                <div>
-                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                    {p.name}
-                    {p.isHost && (
-                      <span className="text-[9px] bg-party-pink/20 text-party-pink font-bold px-1.5 py-0.2 rounded">
-                        HOST
-                      </span>
-                    )}
-                  </h4>
-                  <span className="text-xs text-slate-400">
-                    {p.hasAux ? '🎧 Holding the Aux' : 'Listener'}
-                  </span>
-                </div>
+              <div>
+                <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                  {p.name}
+                  {p.isHost && (
+                    <span className="text-[9px] font-mono uppercase bg-ink-800 px-1 rounded text-zinc-400">
+                      Host
+                    </span>
+                  )}
+                </p>
+                <p className="text-[11px] text-zinc-500 font-mono">
+                  {p.hasAux ? '🎧 Holding Aux' : 'Listener'}
+                </p>
               </div>
 
               {state.isHost && !p.hasAux && (
                 <button
                   onClick={() => actions.passAux(p.id)}
-                  className="px-2.5 py-1 rounded-lg bg-party-pink/20 hover:bg-party-pink text-party-pink hover:text-white text-xs font-bold transition-all"
+                  className="px-2 py-1 rounded bg-ink-800 hover:bg-ink-700 text-lime text-xs font-semibold border border-ink-700 transition-colors"
                 >
                   Pass Aux
                 </button>

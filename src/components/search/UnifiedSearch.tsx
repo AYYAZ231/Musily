@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Play, Plus, Flame, Sparkles, Filter, Music } from 'lucide-react';
+import { Search, Play, Plus, Zap, Music2, ExternalLink } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
-import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../../services/spotifyService';
-import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from '../../services/youtubeService';
+import { SpotifyService } from '../../services/spotifyService';
+import { YouTubeService } from '../../services/youtubeService';
 import { Track } from '../../types';
 
 export const UnifiedSearch: React.FC = () => {
@@ -14,14 +14,13 @@ export const UnifiedSearch: React.FC = () => {
 
   const genres = [
     'Hindi & Bollywood Party',
-    'Punjabi Hits',
-    'EDM & Club Drops',
+    'Punjabi Club Mix',
+    'EDM & House Drops',
     'Global Top 50',
     'Hip Hop & Rap',
-    'Lo-Fi Vibes'
+    'Lo-Fi Beats'
   ];
 
-  // Initial load
   useEffect(() => {
     handleSearch('');
   }, [filter]);
@@ -41,7 +40,6 @@ export const UnifiedSearch: React.FC = () => {
         combined = [...combined, ...ytTracks];
       }
 
-      // If query given, randomize or sort relevant
       setResults(combined);
     } catch (err) {
       console.error('Search error:', err);
@@ -57,53 +55,47 @@ export const UnifiedSearch: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-24">
-      {/* Search Bar Header */}
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none">
+      {/* Search Bar */}
       <div className="relative">
-        <div className="relative flex items-center">
-          <Search className="absolute left-5 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            value={query}
-            onChange={handleInputChange}
-            placeholder="Search songs, artists, Spotify playlists, YouTube Music..."
-            className="w-full pl-14 pr-28 py-4 rounded-3xl bg-surface-elevated/90 border border-white/10 text-white placeholder-slate-400 text-sm md:text-base focus:outline-none focus:border-primary shadow-glow-primary transition-all"
-            autoFocus
-          />
-          {query && (
-            <button
-              onClick={() => {
-                setQuery('');
-                handleSearch('');
-              }}
-              className="absolute right-5 text-xs text-slate-400 hover:text-white"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <input
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          placeholder="Search songs, artists, Spotify playlists, YouTube Music..."
+          className="w-full pl-11 pr-20 py-3 rounded-xl bg-ink-900 border border-ink-800 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-600 transition-colors"
+          autoFocus
+        />
+        {query && (
+          <button
+            onClick={() => {
+              setQuery('');
+              handleSearch('');
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-white"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
-      {/* Filter Source Pills & Quick Tags */}
+      {/* Filters & Tags */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Source Switcher */}
-        <div className="flex p-1 rounded-2xl bg-surface border border-white/5">
+        <div className="flex p-0.5 rounded-lg bg-ink-900 border border-ink-800">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              filter === 'all'
-                ? 'bg-gradient-to-r from-party-pink to-primary text-white shadow'
-                : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              filter === 'all' ? 'bg-ink-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             All Sources
           </button>
           <button
             onClick={() => setFilter('spotify')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-              filter === 'spotify'
-                ? 'bg-spotify text-black shadow-glow-spotify'
-                : 'text-slate-400 hover:text-spotify'
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              filter === 'spotify' ? 'bg-spotify/20 text-spotify' : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-spotify" />
@@ -111,10 +103,8 @@ export const UnifiedSearch: React.FC = () => {
           </button>
           <button
             onClick={() => setFilter('youtube')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-              filter === 'youtube'
-                ? 'bg-youtube text-white shadow'
-                : 'text-slate-400 hover:text-youtube'
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              filter === 'youtube' ? 'bg-youtube/20 text-youtube' : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-youtube" />
@@ -122,8 +112,8 @@ export const UnifiedSearch: React.FC = () => {
           </button>
         </div>
 
-        {/* Quick Genre Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {/* Quick Genre Tags */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {genres.map((g) => (
             <button
               key={g}
@@ -131,7 +121,7 @@ export const UnifiedSearch: React.FC = () => {
                 setQuery(g);
                 handleSearch(g);
               }}
-              className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-[11px] font-medium text-slate-300 hover:text-white whitespace-nowrap transition-colors"
+              className="px-2.5 py-1 rounded-md bg-ink-900 hover:bg-ink-850 border border-ink-800 text-[11px] text-zinc-400 hover:text-white whitespace-nowrap transition-colors"
             >
               {g}
             </button>
@@ -139,91 +129,83 @@ export const UnifiedSearch: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Results Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Music className="w-4 h-4 text-primary" />
-            {query ? `Results for "${query}"` : 'Trending on Spotify & YouTube'}
-          </h3>
-          <span className="text-xs text-slate-400">{results.length} tracks</span>
+      {/* Results Table */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-mono text-zinc-500 uppercase">
+            {query ? `Results for "${query}"` : 'Trending Results'}
+          </span>
+          <span className="text-xs font-mono text-zinc-500">{results.length} tracks</span>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="h-20 rounded-2xl bg-surface animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {results.map((track) => {
+        <div className="rounded-xl bg-ink-900 border border-ink-800 overflow-hidden divide-y divide-ink-800/60">
+          {loading ? (
+            <div className="p-8 text-center text-xs text-zinc-500">Searching catalogs...</div>
+          ) : (
+            results.map((track) => {
               const isCurrent = state.currentTrack?.id === track.id;
               return (
                 <div
                   key={track.id}
-                  className={`flex items-center justify-between p-3 rounded-2xl border transition-all group ${
-                    isCurrent
-                      ? 'bg-primary/20 border-primary/50 shadow-glow-primary'
-                      : 'bg-surface/60 hover:bg-surface border-white/5 hover:border-white/15'
+                  onClick={() => actions.playTrack(track)}
+                  className={`flex items-center justify-between p-3 hover:bg-ink-850 transition-colors cursor-pointer group ${
+                    isCurrent ? 'bg-ink-850/80' : ''
                   }`}
                 >
-                  <div
-                    onClick={() => actions.playTrack(track)}
-                    className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
-                  >
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow shrink-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="relative w-11 h-11 rounded-md overflow-hidden bg-ink-800 shrink-0">
                       <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <Play className="w-5 h-5 text-white fill-white" />
+                        <Play className="w-4 h-4 text-white fill-white" />
                       </div>
                     </div>
 
-                    <div className="min-w-0 truncate">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-primary transition-colors">
-                          {track.title}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-slate-400 truncate">{track.artist}</p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span
-                          className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase ${
-                            track.source === 'spotify'
-                              ? 'bg-spotify/20 text-spotify border border-spotify/30'
-                              : 'bg-youtube/20 text-youtube border border-youtube/30'
-                          }`}
-                        >
-                          {track.source === 'spotify' ? 'Spotify' : 'YouTube'}
-                        </span>
-                        {track.dropTime && (
-                          <span className="text-[9px] text-party-yellow flex items-center gap-0.5 font-bold">
-                            <Sparkles className="w-2.5 h-2.5" /> Drop @ {track.dropTime}s
-                          </span>
-                        )}
-                      </div>
+                    <div className="min-w-0 truncate pr-3">
+                      <p
+                        className={`text-xs sm:text-sm font-semibold truncate ${
+                          isCurrent ? 'text-lime' : 'text-white'
+                        }`}
+                      >
+                        {track.title}
+                      </p>
+                      <p className="text-[11px] text-zinc-400 truncate">{track.artist}</p>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                    <button
-                      onClick={() => actions.addToQueue(track)}
-                      className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition-all active:scale-95"
-                      title={state.isPartyActive ? 'Queue to Party' : 'Add to Queue'}
+                  {/* Badges & Actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span
+                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border hidden sm:inline ${
+                        track.source === 'spotify'
+                          ? 'border-spotify/30 text-spotify bg-spotify/5'
+                          : 'border-youtube/30 text-youtube bg-youtube/5'
+                      }`}
                     >
-                      {state.isPartyActive ? (
-                        <Flame className="w-4 h-4 text-party-pink" />
-                      ) : (
-                        <Plus className="w-4 h-4" />
-                      )}
+                      {track.source === 'spotify' ? 'Spotify' : 'YouTube'}
+                    </span>
+
+                    {track.dropTime && (
+                      <span className="text-[10px] font-mono text-lime hidden md:inline">
+                        Drop @ {track.dropTime}s
+                      </span>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        actions.addToQueue(track);
+                      }}
+                      className="p-1.5 rounded bg-ink-800 hover:bg-ink-700 text-zinc-300 hover:text-white transition-colors"
+                      title={state.isPartyActive ? 'Queue to party' : 'Add to queue'}
+                    >
+                      <Plus className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
     </div>
   );

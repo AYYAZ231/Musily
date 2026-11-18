@@ -7,53 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#090B10',
-        surface: {
-          DEFAULT: '#111520',
-          elevated: '#171C2B',
-          glass: 'rgba(18, 22, 36, 0.75)',
-          border: 'rgba(255, 255, 255, 0.08)',
+        ink: {
+          950: '#060608',
+          900: '#0A0A0D',
+          850: '#0F0F13',
+          800: '#14141A',
+          700: '#1D1D26',
+          600: '#282834',
         },
-        primary: {
-          DEFAULT: '#8B5CF6',
-          hover: '#7C3AED',
-          light: '#A78BFA',
+        lime: {
+          DEFAULT: '#D4FF00',
+          hover: '#C2EB00',
+          muted: 'rgba(212, 255, 0, 0.12)',
         },
         spotify: '#1DB954',
         youtube: '#FF0033',
-        party: {
-          pink: '#EC4899',
-          purple: '#8B5CF6',
-          cyan: '#06B6D4',
-          yellow: '#F59E0B',
-          glow: 'rgba(236, 72, 153, 0.35)',
-        }
+      },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       boxShadow: {
-        'glow-primary': '0 0 25px rgba(139, 92, 246, 0.35)',
-        'glow-party': '0 0 35px rgba(236, 72, 153, 0.45)',
-        'glow-cyan': '0 0 25px rgba(6, 182, 212, 0.35)',
-        'glow-spotify': '0 0 25px rgba(29, 185, 84, 0.35)',
-      },
-      animation: {
-        'spin-slow': 'spin 18s linear infinite',
-        'pulse-glow': 'pulse-glow 2.5s ease-in-out infinite',
-        'float-reaction': 'float-up 2s ease-out forwards',
-        'equalizer': 'equalizer 1s ease-in-out infinite alternate',
-      },
-      keyframes: {
-        'pulse-glow': {
-          '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
-          '50%': { opacity: '1', transform: 'scale(1.04)' },
-        },
-        'float-up': {
-          '0%': { transform: 'translateY(0) scale(0.8)', opacity: '1' },
-          '100%': { transform: 'translateY(-120px) scale(1.4)', opacity: '0' },
-        },
-        'equalizer': {
-          '0%': { height: '15%' },
-          '100%': { height: '100%' },
-        }
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.4)',
+        'elevated': '0 10px 30px -10px rgba(0, 0, 0, 0.7)',
+        'lime-glow': '0 0 20px rgba(212, 255, 0, 0.25)',
       }
     },
   },

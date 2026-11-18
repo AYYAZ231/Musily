@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Flame, Radio, ArrowRight, ShieldCheck, Copy, Check, Users } from 'lucide-react';
+import { X, Radio, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 
 interface JoinCreateModalProps {
@@ -8,7 +8,7 @@ interface JoinCreateModalProps {
 }
 
 export const JoinCreateModal: React.FC<JoinCreateModalProps> = ({ isOpen, onClose }) => {
-  const { state, actions } = useMusicStore();
+  const { actions } = useMusicStore();
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [hostName, setHostName] = useState('DJ_Host');
   const [guestName, setGuestName] = useState('PartyGuest');
@@ -51,51 +51,40 @@ export const JoinCreateModal: React.FC<JoinCreateModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-md rounded-3xl bg-[#111522] border border-party-pink/30 shadow-glow-party p-6 sm:p-8 overflow-hidden">
-        {/* Glow decorative spheres */}
-        <div className="absolute -top-12 -right-12 w-36 h-36 bg-party-pink/20 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-primary/20 rounded-full blur-2xl pointer-events-none" />
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn select-none">
+      <div className="w-full max-w-sm rounded-2xl bg-ink-950 border border-ink-800 p-6 shadow-elevated">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-party-pink to-primary flex items-center justify-center shadow-lg">
-              <Flame className="w-5 h-5 text-white fill-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-display font-bold text-white">Party on Musily</h3>
-              <p className="text-xs text-party-cyan">Inspired by naux.party • 100% Free Live Sync</p>
-            </div>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-lime" />
+            <h3 className="text-base font-display font-bold text-white uppercase tracking-tight">
+              Party Aux Room
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-ink-900 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tabs: Host vs Join */}
-        <div className="flex p-1 rounded-2xl bg-surface-elevated/80 border border-white/5 mb-6 relative z-10">
+        {/* Tab switch */}
+        <div className="flex p-0.5 rounded-lg bg-ink-900 border border-ink-800 mb-5">
           <button
             type="button"
             onClick={() => setTab('create')}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              tab === 'create'
-                ? 'bg-gradient-to-r from-party-pink to-primary text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+              tab === 'create' ? 'bg-ink-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
-            Host a Party
+            Create Room
           </button>
           <button
             type="button"
             onClick={() => setTab('join')}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              tab === 'join'
-                ? 'bg-gradient-to-r from-primary to-party-cyan text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+              tab === 'join' ? 'bg-ink-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             Join with Code
@@ -103,83 +92,66 @@ export const JoinCreateModal: React.FC<JoinCreateModalProps> = ({ isOpen, onClos
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300">
+          <div className="mb-4 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
             {error}
           </div>
         )}
 
-        {/* Tab 1: Host Party Form */}
         {tab === 'create' ? (
-          <form onSubmit={handleCreate} className="space-y-4 relative z-10">
+          <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-mono text-zinc-400 uppercase mb-1">
                 Your DJ Nickname
               </label>
               <input
                 type="text"
                 value={hostName}
                 onChange={(e) => setHostName(e.target.value)}
-                placeholder="e.g. MasterDJ, Aryan, VibeKing"
-                className="w-full px-4 py-3 rounded-xl bg-surface-elevated border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-party-pink transition-colors"
+                placeholder="e.g. Aryan, Sam, Host"
+                className="w-full px-3 py-2 rounded-lg bg-ink-900 border border-ink-800 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-zinc-600"
                 required
               />
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5 text-xs text-slate-300 space-y-1.5">
-              <div className="flex items-center gap-2 text-party-pink font-semibold">
-                <Radio className="w-4 h-4" />
-                <span>NAUX Aux Features Included:</span>
-              </div>
-              <ul className="list-disc list-inside text-[11px] text-slate-400 space-y-0.5">
-                <li>Instant 6-character room code & shareable link</li>
-                <li>Live synchronized playback across all devices</li>
-                <li><strong>The Drop Mode:</strong> Skip slow intros, play straight from the drop</li>
-                <li>Democratic voting queue & live emoji bursts</li>
-              </ul>
-            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Creates a synchronized room code you can send to friends. Anyone can suggest tracks and vote to bump them up!
+            </p>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-party-pink via-primary to-party-cyan hover:opacity-95 text-white font-bold text-sm shadow-glow-party transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-lg bg-lime hover:bg-lime-hover text-black font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 shadow-subtle"
             >
-              {loading ? (
-                <span>Generating Room...</span>
-              ) : (
-                <>
-                  <span>Create Party Room</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <Radio className="w-3.5 h-3.5" />
+              <span>{loading ? 'Creating...' : 'Launch Room'}</span>
             </button>
           </form>
         ) : (
-          /* Tab 2: Join Party Form */
-          <form onSubmit={handleJoin} className="space-y-4 relative z-10">
+          <form onSubmit={handleJoin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Party Room Code
+              <label className="block text-[11px] font-mono text-zinc-400 uppercase mb-1">
+                Room Code
               </label>
               <input
                 type="text"
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                placeholder="e.g. AUX-9912 or 6-digit code"
-                className="w-full px-4 py-3 rounded-xl bg-surface-elevated border border-white/10 text-white placeholder-slate-500 text-lg font-mono tracking-widest uppercase focus:outline-none focus:border-primary transition-colors text-center"
+                placeholder="e.g. AUX-9921"
+                className="w-full px-3 py-2 rounded-lg bg-ink-900 border border-ink-800 text-white placeholder-zinc-500 text-center font-mono tracking-widest text-sm uppercase focus:outline-none focus:border-zinc-600"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Your Name / Alias
+              <label className="block text-[11px] font-mono text-zinc-400 uppercase mb-1">
+                Your Name
               </label>
               <input
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                placeholder="e.g. Alex, Sam"
-                className="w-full px-4 py-3 rounded-xl bg-surface-elevated border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-primary transition-colors"
+                placeholder="e.g. Alex"
+                className="w-full px-3 py-2 rounded-lg bg-ink-900 border border-ink-800 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-zinc-600"
                 required
               />
             </div>
@@ -187,24 +159,17 @@ export const JoinCreateModal: React.FC<JoinCreateModalProps> = ({ isOpen, onClos
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-party-cyan hover:opacity-95 text-white font-bold text-sm shadow-glow-primary transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 shadow-subtle"
             >
-              {loading ? (
-                <span>Connecting to Party...</span>
-              ) : (
-                <>
-                  <span>Join Party</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <span>{loading ? 'Joining...' : 'Join Party'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
         )}
 
-        {/* Free P2P Notice */}
-        <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-center gap-2 text-[11px] text-slate-400 text-center">
-          <ShieldCheck className="w-3.5 h-3.5 text-spotify" />
-          <span>Peer-to-Peer WebRTC sync: 100% Free forever with no server costs</span>
+        <div className="mt-4 pt-3 border-t border-ink-800 flex items-center justify-center gap-1.5 text-[11px] font-mono text-zinc-500">
+          <ShieldCheck className="w-3.5 h-3.5 text-lime" />
+          <span>Peer-to-Peer WebRTC · 100% Free Forever</span>
         </div>
       </div>
     </div>
