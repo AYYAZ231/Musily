@@ -117,4 +117,22 @@ export interface LinkedAccounts {
   };
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  createdAt: number;
+  spotifyConnected: boolean;
+  spotifyUsername?: string;
+  youtubeConnected: boolean;
+  youtubeChannel?: string;
+}
+
+export interface StoredUser extends UserProfile {
+  password: string;
+  spotifyPasswordOrToken?: string;
+  youtubePasswordOrToken?: string;
+}
+
 export type ActiveTab = 'home' | 'search' | 'party' | 'library' | 'settings';

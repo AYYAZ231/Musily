@@ -14,6 +14,7 @@ import { PassAuxModal } from './components/party/PassAuxModal';
 import { AccountLinkModal } from './components/library/AccountLinkModal';
 import { FullPlayerModal } from './components/player/FullPlayerModal';
 import { EqualizerModal } from './components/player/EqualizerModal';
+import { AuthModal } from './components/auth/AuthModal';
 import { useMusicStore } from './store/useMusicStore';
 
 export const App: React.FC = () => {
@@ -105,6 +106,7 @@ export const App: React.FC = () => {
 
       <FullPlayerModal />
       <EqualizerModal />
+      <AuthModal />
     </div>
   );
 };

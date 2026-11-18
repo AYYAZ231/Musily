@@ -11,6 +11,7 @@ export const UnifiedSearch: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'spotify' | 'youtube'>('all');
 
   const genres = [
     'All Music',
@@ -41,6 +42,12 @@ export const UnifiedSearch: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const filteredResults = results.filter((track) => {
+    if (sourceFilter === 'spotify') return track.source === 'spotify';
+    if (sourceFilter === 'youtube') return track.source === 'youtube';
+    return true;
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -96,20 +103,63 @@ export const UnifiedSearch: React.FC = () => {
         ))}
       </div>
 
+      {/* Connected Account Source Filters */}
+      {(state.linkedAccounts.spotify.isConnected || state.linkedAccounts.youtube.isConnected) && (
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="text-[11px] font-mono text-zinc-400 font-semibold">Priority Source:</span>
+          <button
+            onClick={() => setSourceFilter('all')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+              sourceFilter === 'all'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent shadow-xs'
+                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800'
+            }`}
+          >
+            All Connected (Unified)
+          </button>
+          {state.linkedAccounts.spotify.isConnected && (
+            <button
+              onClick={() => setSourceFilter('spotify')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all ${
+                sourceFilter === 'spotify'
+                  ? 'bg-[#1DB954] text-white border-transparent shadow-xs'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-[#1DB954]" />
+              <span>Spotify Picks (@{state.linkedAccounts.spotify.username})</span>
+            </button>
+          )}
+          {state.linkedAccounts.youtube.isConnected && (
+            <button
+              onClick={() => setSourceFilter('youtube')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all ${
+                sourceFilter === 'youtube'
+                  ? 'bg-[#FF0033] text-white border-transparent shadow-xs'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-[#FF0033]" />
+              <span>YouTube Music (@{state.linkedAccounts.youtube.channelTitle})</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Results Table */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-mono text-zinc-500 uppercase">
             {query ? `Results for "${query}"` : 'Recommended Catalog'}
           </span>
-          <span className="text-xs font-mono text-zinc-500">{results.length} tracks</span>
+          <span className="text-xs font-mono text-zinc-500">{filteredResults.length} tracks</span>
         </div>
 
         <div className="rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/60">
           {loading ? (
             <div className="p-8 text-center text-xs text-zinc-400">Loading catalog...</div>
           ) : (
-            results.map((track, idx) => {
+            filteredResults.map((track, idx) => {
               const isCurrent = state.currentTrack?.id === track.id;
               const isPlayingThis = isCurrent && state.isPlaying;
 

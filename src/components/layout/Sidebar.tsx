@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Search, Radio, Library, Settings, Sliders, Sparkles } from 'lucide-react';
+import { Compass, Search, Radio, Library, Settings, Sliders, Sparkles, LogOut } from 'lucide-react';
 import { ActiveTab } from '../../types';
 import { useMusicStore } from '../../store/useMusicStore';
 import { BrandLogo } from '../common/BrandLogo';
@@ -112,35 +112,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenAccountModal, onOpenPart
         </div>
       </div>
 
-      {/* Footer Profile & Settings Shortcut */}
+      {/* Footer Profile & Quick Actions */}
       <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-1">
         <div
           onClick={() => actions.setActiveTab('settings')}
           className="flex items-center gap-2.5 min-w-0 cursor-pointer group flex-1"
         >
           <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-900 dark:text-white shrink-0 group-hover:border-zinc-500 transition-colors">
-            {state.linkedAccounts.spotify.username?.charAt(0) || 'U'}
+            {state.currentUser?.name?.charAt(0) || state.linkedAccounts.spotify.username?.charAt(0) || 'U'}
           </div>
           <div className="min-w-0 truncate">
             <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate group-hover:underline">
-              {state.linkedAccounts.spotify.username || 'Musily User'}
+              {state.currentUser?.name || state.linkedAccounts.spotify.username || 'Musily User'}
             </p>
-            <p className="text-[10px] text-zinc-400 truncate font-mono">Preferences</p>
+            <p className="text-[10px] text-zinc-400 truncate font-mono">
+              {state.currentUser?.email || 'Logged In'}
+            </p>
           </div>
         </div>
 
-        {/* Settings button */}
-        <button
-          onClick={() => actions.setActiveTab('settings')}
-          className={`p-1.5 rounded-lg transition-colors ${
-            state.activeTab === 'settings'
-              ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-              : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
-          }`}
-          title="Open Settings"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Settings button */}
+          <button
+            onClick={() => actions.setActiveTab('settings')}
+            className={`p-1.5 rounded-lg transition-colors ${
+              state.activeTab === 'settings'
+                ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+                : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }`}
+            title="Open Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+
+          {/* Logout button */}
+          {state.isAuthenticated && (
+            <button
+              onClick={actions.logout}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+              title="Log Out of Musily"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode, EqualizerBands, EqualizerSettings } from '../types';
+import { Track, PartyRoom, Participant, Reaction, ChatMessage, ActiveTab, LinkedAccounts, ThemeMode, EqualizerBands, EqualizerSettings, UserProfile } from '../types';
 import { AudioPlayer } from '../services/audioPlayer';
 import { PartyP2PService, PartyMessage } from '../services/partyP2PService';
 import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../services/spotifyService';
 import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from '../services/youtubeService';
 import { DEFAULT_EQUALIZER_BANDS, EQUALIZER_PRESETS, AIAudioService } from '../services/aiAudioService';
+import { AuthService } from '../services/authService';
 import confetti from 'canvas-confetti';
 
 interface MusicStoreState {
+  currentUser: UserProfile | null;
+  isAuthenticated: boolean;
   currentTrack: Track | null;
   isPlaying: boolean;
   currentTime: number;
@@ -76,8 +79,13 @@ const applyThemeToDOM = (theme: ThemeMode) => {
   }
 };
 
+// Session initialization
+const initialSessionUser = AuthService.getCurrentSession();
+
 // Singleton in-memory state
 let globalState: MusicStoreState = {
+  currentUser: initialSessionUser,
+  isAuthenticated: !!initialSessionUser,
   currentTrack: INITIAL_QUEUE[0],
   isPlaying: false,
   currentTime: 0,
@@ -99,14 +107,14 @@ let globalState: MusicStoreState = {
   isEqualizerOpen: false,
   linkedAccounts: {
     spotify: {
-      isConnected: SpotifyService.isConnected(),
-      username: SpotifyService.getProfile()?.username || 'SpotifyUser',
-      avatar: SpotifyService.getProfile()?.avatar
+      isConnected: initialSessionUser ? initialSessionUser.spotifyConnected : SpotifyService.isConnected(),
+      username: initialSessionUser?.spotifyUsername || initialSessionUser?.name || SpotifyService.getProfile()?.username || 'SpotifyUser',
+      avatar: initialSessionUser?.avatar || SpotifyService.getProfile()?.avatar
     },
     youtube: {
-      isConnected: YouTubeService.isConnected(),
-      channelTitle: YouTubeService.getProfile()?.channelTitle || 'YouTubeUser',
-      avatar: YouTubeService.getProfile()?.avatar
+      isConnected: initialSessionUser ? initialSessionUser.youtubeConnected : YouTubeService.isConnected(),
+      channelTitle: initialSessionUser?.youtubeChannel || initialSessionUser?.name || YouTubeService.getProfile()?.channelTitle || 'YouTubeUser',
+      avatar: initialSessionUser?.avatar || YouTubeService.getProfile()?.avatar
     }
   }
 };
@@ -758,6 +766,68 @@ export function useMusicStore() {
           ...globalState.linkedAccounts,
           youtube: { isConnected: false }
         }
+      });
+    },
+
+    login: (identifier: string, password: string) => {
+      const result = AuthService.login(identifier, password);
+      if (result.success && result.user) {
+        updateState({
+          currentUser: result.user,
+          isAuthenticated: true,
+          linkedAccounts: {
+            spotify: {
+              isConnected: result.user.spotifyConnected,
+              username: result.user.spotifyUsername || result.user.name,
+              avatar: result.user.avatar
+            },
+            youtube: {
+              isConnected: result.user.youtubeConnected,
+              channelTitle: result.user.youtubeChannel || result.user.name,
+              avatar: result.user.avatar
+            }
+          }
+        });
+      }
+      return result;
+    },
+
+    register: (data: {
+      name: string;
+      email: string;
+      password: string;
+      spotifyUsername?: string;
+      spotifyPassword?: string;
+      youtubeChannel?: string;
+      youtubePassword?: string;
+    }) => {
+      const result = AuthService.register(data);
+      if (result.success && result.user) {
+        updateState({
+          currentUser: result.user,
+          isAuthenticated: true,
+          linkedAccounts: {
+            spotify: {
+              isConnected: result.user.spotifyConnected,
+              username: result.user.spotifyUsername || result.user.name,
+              avatar: result.user.avatar
+            },
+            youtube: {
+              isConnected: result.user.youtubeConnected,
+              channelTitle: result.user.youtubeChannel || result.user.name,
+              avatar: result.user.avatar
+            }
+          }
+        });
+      }
+      return result;
+    },
+
+    logout: () => {
+      AuthService.logout();
+      updateState({
+        currentUser: null,
+        isAuthenticated: false
       });
     }
   };

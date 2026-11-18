@@ -359,6 +359,86 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal }) => {
       </section>
 
       {/* =========================================================================
+          SECTION: PERSONALIZED RECOMMENDATIONS (POWERED BY SPOTIFY & YOUTUBE LOGIN)
+          ========================================================================= */}
+      {(state.linkedAccounts.spotify.isConnected || state.linkedAccounts.youtube.isConnected) && (
+        <section className="space-y-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-500/[0.06] via-zinc-900/[0.02] to-cyan-500/[0.06] dark:from-emerald-500/[0.08] dark:to-cyan-500/[0.08] border border-emerald-500/20 dark:border-emerald-500/30 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
+                <h2 className="text-lg sm:text-xl font-display font-extrabold text-zinc-900 dark:text-white">
+                  Curated For Your Connected Accounts
+                </h2>
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Personalized song recommendations and party drops synced from your streaming profile.
+              </p>
+            </div>
+
+            {/* Badges showing connected identities */}
+            <div className="flex flex-wrap items-center gap-2">
+              {state.linkedAccounts.spotify.isConnected && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1DB954]/15 border border-[#1DB954]/30 text-[#1DB954] text-xs font-mono font-bold shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1DB954] animate-pulse" />
+                  <span>Spotify: @{state.linkedAccounts.spotify.username}</span>
+                </div>
+              )}
+              {state.linkedAccounts.youtube.isConnected && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF0033]/15 border border-[#FF0033]/30 text-[#FF0033] text-xs font-mono font-bold shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF0033] animate-pulse" />
+                  <span>YouTube: @{state.linkedAccounts.youtube.channelTitle}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Personalized recommendations grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-2">
+            {(state.linkedAccounts.spotify.isConnected && state.linkedAccounts.youtube.isConnected
+              ? [FEATURED_SPOTIFY_TRACKS[0], FEATURED_YOUTUBE_TRACKS[0], FEATURED_SPOTIFY_TRACKS[2], FEATURED_YOUTUBE_TRACKS[1]]
+              : state.linkedAccounts.spotify.isConnected
+              ? FEATURED_SPOTIFY_TRACKS.slice(0, 4)
+              : FEATURED_YOUTUBE_TRACKS.slice(0, 4)
+            ).map((recTrack) => {
+              const isPlaying = state.currentTrack?.id === recTrack.id && state.isPlaying;
+              return (
+                <div
+                  key={recTrack.id}
+                  onClick={() => actions.playTrack(recTrack)}
+                  className="group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/40 dark:hover:border-[#D4FF00]/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs"
+                >
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
+                    <img
+                      src={recTrack.coverUrl}
+                      alt={recTrack.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-mono text-emerald-400 font-bold">
+                      ⚡ Drop @ {recTrack.dropTime}s
+                    </div>
+                    {isPlaying && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <EqualizerBars isPlaying={true} size="sm" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00] transition-colors">
+                      {recTrack.title}
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                      {recTrack.artist}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* =========================================================================
           SECTION 2: GLOBAL CHARTBUSTERS & BANGERS (High-End Visual Cards)
           ========================================================================= */}
       <section className="space-y-4">
