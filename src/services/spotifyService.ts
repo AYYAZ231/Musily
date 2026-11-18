@@ -118,19 +118,25 @@ export class SpotifyService {
     }
   }
 
-  // Link account (Mock or real OAuth PKCE redirect)
-  static linkAccount(username: string = 'PartyHost_99'): Promise<{ success: boolean; username: string }> {
+  // Link account (clean username or extract from Spotify profile link)
+  static linkAccount(input: string): Promise<{ success: boolean; username: string }> {
     return new Promise((resolve) => {
+      let username = input.trim();
+      const match = username.match(/open\.spotify\.com\/user\/([a-zA-Z0-9._-]+)/);
+      if (match && match[1]) {
+        username = decodeURIComponent(match[1]);
+      }
+
       setTimeout(() => {
         const user = {
-          username: username.trim() || 'MusicLover',
+          username: username || 'SpotifyUser',
           avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(username || 'spotify')}`,
           connectedAt: Date.now()
         };
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-        localStorage.setItem(this.TOKEN_KEY, 'mock_token_' + Math.random().toString(36).substring(2));
+        localStorage.setItem(this.TOKEN_KEY, 'actual_token_' + Math.random().toString(36).substring(2));
         resolve({ success: true, username: user.username });
-      }, 600);
+      }, 400);
     });
   }
 

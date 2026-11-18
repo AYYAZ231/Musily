@@ -40,6 +40,41 @@ export const App: React.FC = () => {
       if (partyCode && !state.isPartyActive) {
         setPartyModalOpen(true);
       }
+
+      // Check if returning from official accounts.spotify.com OAuth redirect with #access_token=...
+      if (window.location.hash.includes('access_token')) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const token = hashParams.get('access_token');
+        if (token) {
+          fetch('https://api.spotify.com/v1/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then((r) => r.json())
+            .then((profile) => {
+              if (profile && (profile.display_name || profile.id)) {
+                const name = profile.display_name || profile.id;
+                const avatar =
+                  profile.images?.[0]?.url ||
+                  `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(name)}`;
+                if (window.opener) {
+                  window.opener.postMessage(
+                    {
+                      type: 'MUSILY_OAUTH_SUCCESS',
+                      provider: 'spotify',
+                      payload: { username: name, avatar, email: profile.email, token }
+                    },
+                    '*'
+                  );
+                  window.close();
+                } else {
+                  actions.linkSpotify(name);
+                  window.history.replaceState(null, '', window.location.pathname);
+                }
+              }
+            })
+            .catch((e) => console.error('Spotify profile fetch error:', e));
+        }
+      }
     }
   }, []);
 

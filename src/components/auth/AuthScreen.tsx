@@ -60,7 +60,8 @@ export const AuthScreen: React.FC = () => {
     setIsNotFound(false);
     setOauthLoading(provider);
 
-    const res = await OAuthBrowserService.openOAuth(provider);
+    const initial = loginIdentifier.trim();
+    const res = await OAuthBrowserService.openOAuth(provider, initial);
     setOauthLoading(null);
 
     if (res.success) {
@@ -83,18 +84,19 @@ export const AuthScreen: React.FC = () => {
   // Register Form OAuth Linking
   const handleOAuthRegisterLink = async (provider: 'spotify' | 'youtube') => {
     setOauthLoading(provider);
-    const res = await OAuthBrowserService.openOAuth(provider);
+    const initial = provider === 'spotify' ? spotifyUsername.trim() : youtubeChannel.trim();
+    const res = await OAuthBrowserService.openOAuth(provider, initial);
     setOauthLoading(null);
 
     if (res.success) {
       if (provider === 'spotify') {
         setEnableSpotify(true);
-        setSpotifyUsername(res.username || 'SpotifyUser');
+        setSpotifyUsername(res.username || '');
         setSpotifyPassword(res.token || 'oauth_connected');
         setSpotifyLinkedOAuth(true);
       } else {
         setEnableYouTube(true);
-        setYoutubeChannel(res.channelTitle || 'YouTubeMusicUser');
+        setYoutubeChannel(res.channelTitle || '');
         setYoutubePassword(res.token || 'oauth_connected');
         setYoutubeLinkedOAuth(true);
       }
@@ -560,21 +562,34 @@ export const AuthScreen: React.FC = () => {
 
                       {/* Manual / custom credentials fallback */}
                       {!spotifyLinkedOAuth && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                          <input
-                            type="text"
-                            value={spotifyUsername}
-                            onChange={(e) => setSpotifyUsername(e.target.value)}
-                            placeholder="Or type Spotify Username"
-                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
-                          />
-                          <input
-                            type="password"
-                            value={spotifyPassword}
-                            onChange={(e) => setSpotifyPassword(e.target.value)}
-                            placeholder="Spotify Password / Token"
-                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
-                          />
+                        <div className="space-y-1.5 pt-1">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={spotifyUsername}
+                              onChange={(e) => setSpotifyUsername(e.target.value)}
+                              placeholder="Your ACTUAL Spotify Username or Profile Link"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
+                            />
+                            <input
+                              type="password"
+                              value={spotifyPassword}
+                              onChange={(e) => setSpotifyPassword(e.target.value)}
+                              placeholder="Password or Token (optional)"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#1DB954]"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                            <span>Connects real playlists & personal favorites</span>
+                            <a
+                              href="https://open.spotify.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#1DB954] hover:underline flex items-center gap-1 font-semibold"
+                            >
+                              <span>Open Spotify Web ↗</span>
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -634,21 +649,34 @@ export const AuthScreen: React.FC = () => {
 
                       {/* Manual / custom credentials fallback */}
                       {!youtubeLinkedOAuth && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                          <input
-                            type="text"
-                            value={youtubeChannel}
-                            onChange={(e) => setYoutubeChannel(e.target.value)}
-                            placeholder="Or type YouTube Channel"
-                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
-                          />
-                          <input
-                            type="password"
-                            value={youtubePassword}
-                            onChange={(e) => setYoutubePassword(e.target.value)}
-                            placeholder="YouTube Password / Token"
-                            className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
-                          />
+                        <div className="space-y-1.5 pt-1">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={youtubeChannel}
+                              onChange={(e) => setYoutubeChannel(e.target.value)}
+                              placeholder="Your ACTUAL YouTube Handle (e.g. @channel) or URL"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
+                            />
+                            <input
+                              type="password"
+                              value={youtubePassword}
+                              onChange={(e) => setYoutubePassword(e.target.value)}
+                              placeholder="Password or Token (optional)"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000]"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                            <span>Connects real channels & party drops</span>
+                            <a
+                              href="https://music.youtube.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-red-400 hover:underline flex items-center gap-1 font-semibold"
+                            >
+                              <span>Open YouTube Music ↗</span>
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>

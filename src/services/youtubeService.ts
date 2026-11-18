@@ -104,17 +104,23 @@ export class YouTubeService {
     }
   }
 
-  static linkAccount(channelName: string = 'PartyDJ_Channel'): Promise<{ success: boolean; channelName: string }> {
+  static linkAccount(input: string): Promise<{ success: boolean; channelName: string }> {
     return new Promise((resolve) => {
+      let channelName = input.trim();
+      const match = channelName.match(/youtube\.com\/@([a-zA-Z0-9._-]+)/);
+      if (match && match[1]) {
+        channelName = `@${match[1]}`;
+      }
+
       setTimeout(() => {
         const user = {
-          channelTitle: channelName.trim() || 'My YouTube Music Channel',
+          channelTitle: channelName || 'YouTubeChannel',
           avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(channelName || 'youtube')}`,
           connectedAt: Date.now()
         };
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
         resolve({ success: true, channelName: user.channelTitle });
-      }, 500);
+      }, 400);
     });
   }
 

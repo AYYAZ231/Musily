@@ -17,7 +17,7 @@ export class OAuthBrowserService {
    * Opens a dedicated browser window for Spotify or YouTube authentication.
    * Connects directly with the user's active browser session or opens provider credentials.
    */
-  static openOAuth(provider: 'spotify' | 'youtube'): Promise<OAuthResult> {
+  static openOAuth(provider: 'spotify' | 'youtube', initialAccount: string = ''): Promise<OAuthResult> {
     return new Promise((resolve) => {
       // Close any previously opened popup
       if (this.activePopup && !this.activePopup.closed) {
@@ -36,7 +36,9 @@ export class OAuthBrowserService {
       const left = Math.round(screenLeft + (outerWidth - width) / 2);
       const top = Math.round(screenTop + (outerHeight - height) / 2);
 
-      const targetUrl = `${window.location.origin}/?oauth=${provider}&t=${Date.now()}`;
+      const targetUrl = `${window.location.origin}/?oauth=${provider}&account=${encodeURIComponent(
+        initialAccount
+      )}&t=${Date.now()}`;
       const popupWindow = window.open(
         targetUrl,
         `Musily_${provider}_OAuth`,

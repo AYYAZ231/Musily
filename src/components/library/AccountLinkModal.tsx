@@ -134,7 +134,7 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                   type="text"
                   value={spotifyUser}
                   onChange={(e) => setSpotifyUser(e.target.value)}
-                  placeholder="Or enter Spotify username"
+                  placeholder="Your ACTUAL Spotify username or profile URL"
                   className="flex-1 px-3 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
                 />
                 <button
@@ -144,6 +144,16 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                   Link
                 </button>
               </form>
+              <div className="flex justify-end pt-0.5">
+                <a
+                  href="https://open.spotify.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-[#1DB954] hover:underline"
+                >
+                  Open open.spotify.com ↗
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -195,7 +205,7 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                   type="text"
                   value={ytChannel}
                   onChange={(e) => setYtChannel(e.target.value)}
-                  placeholder="Or enter YouTube channel"
+                  placeholder="Your ACTUAL YouTube handle (e.g. @channel) or URL"
                   className="flex-1 px-3 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 focus:outline-none focus:border-zinc-400"
                 />
                 <button
@@ -205,6 +215,16 @@ export const AccountLinkModal: React.FC<AccountLinkModalProps> = ({ isOpen, onCl
                   Link
                 </button>
               </form>
+              <div className="flex justify-end pt-0.5">
+                <a
+                  href="https://music.youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-[#FF0033] hover:underline"
+                >
+                  Open music.youtube.com ↗
+                </a>
+              </div>
             </div>
           )}
         </div>
