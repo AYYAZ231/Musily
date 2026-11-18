@@ -37,14 +37,23 @@ interface MusicStoreState {
   isEqualizerOpen: boolean;
   searchQuery: string;
   isSidebarCollapsed: boolean;
+  aiAutoplayEnabled: boolean;
+  activeAIGenre: string;
+  aiGenreInsight: string;
 }
 
-const INITIAL_QUEUE: Track[] = [
-  FEATURED_SPOTIFY_TRACKS[0],
-  FEATURED_YOUTUBE_TRACKS[0],
-  FEATURED_SPOTIFY_TRACKS[2],
-  FEATURED_YOUTUBE_TRACKS[3]
-];
+const INITIAL_TRACK: Track = FEATURED_SPOTIFY_TRACKS[0];
+
+const getInitialQueue = (track: Track): Track[] => {
+  try {
+    const suggestions = RecommendationService.getAIGenreSuggestions(track, 6, [track.id]);
+    if (suggestions.length > 0) return suggestions;
+  } catch {}
+  return [
+    FEATURED_SPOTIFY_TRACKS[1],
+    FEATURED_SPOTIFY_TRACKS[4] || FEATURED_SPOTIFY_TRACKS[1]
+  ];
+};
 
 const getInitialTheme = (): ThemeMode => {
   if (typeof window !== 'undefined') {
@@ -131,12 +140,12 @@ const getInitialSidebarCollapsed = (): boolean => {
 let globalState: MusicStoreState = {
   currentUser: initialSessionUser,
   isAuthenticated: !!initialSessionUser,
-  currentTrack: INITIAL_QUEUE[0],
+  currentTrack: INITIAL_TRACK,
   isPlaying: false,
   currentTime: 0,
-  duration: INITIAL_QUEUE[0].duration,
+  duration: INITIAL_TRACK.duration,
   volume: 0.8,
-  queue: INITIAL_QUEUE.slice(1),
+  queue: getInitialQueue(INITIAL_TRACK),
   history: [],
   likedSongs: getInitialLikedSongs(),
   followedArtists: getInitialFollowedArtists(),
@@ -154,6 +163,9 @@ let globalState: MusicStoreState = {
   isEqualizerOpen: false,
   searchQuery: '',
   isSidebarCollapsed: getInitialSidebarCollapsed(),
+  aiAutoplayEnabled: true,
+  activeAIGenre: RecommendationService.detectTrackGenre(INITIAL_TRACK).genre,
+  aiGenreInsight: 'AI Smart Radio active: Auto-suggesting songs with matching genre vibes',
   linkedAccounts: {
     spotify: {
       isConnected: initialSessionUser ? initialSessionUser.spotifyConnected : SpotifyService.isConnected(),
@@ -536,22 +548,43 @@ export function useMusicStore() {
 
     setFullPlayerOpen: (open: boolean) => updateState({ isFullPlayerOpen: open }),
 
-    playTrack: (track: Track) => {
+    playTrack: (track: Track, options?: { keepQueue?: boolean; explicitGenre?: string }) => {
       player.loadTrack(track, true);
       RecommendationService.recordListen(track);
 
       const existingHistory = globalState.history.filter((t) => t.id !== track.id);
+      const genreMeta = RecommendationService.detectTrackGenre(track);
+      const activeGenre = options?.explicitGenre || genreMeta.genre;
+
+      let newQueue = globalState.queue;
+
+      // If AI Autoplay is enabled and we are not explicitly keeping an existing queue:
+      // Auto-suggest next songs of the SAME GENRE!
+      if (globalState.aiAutoplayEnabled && (!options?.keepQueue || globalState.queue.length <= 1)) {
+        const aiGenreSuggestions = RecommendationService.getAIGenreSuggestions(track, 8, [track.id]);
+        newQueue = aiGenreSuggestions;
+      }
+
+      const trackWithGenre: Track = {
+        ...track,
+        aiGenreMatch: activeGenre
+      };
+
       updateState({
-        currentTrack: track,
+        currentTrack: trackWithGenre,
         isPlaying: true,
-        history: [track, ...existingHistory].slice(0, 30)
+        history: [track, ...existingHistory].slice(0, 30),
+        activeAIGenre: activeGenre,
+        aiGenreInsight: `AI Smart Radio: Curating ${activeGenre} matches`,
+        queue: newQueue
       });
 
       if (globalState.isPartyActive && (globalState.isHost || globalState.hasAux)) {
         if (globalState.partyRoom) {
           syncPartyRoomState({
             ...globalState.partyRoom,
-            currentTrack: track,
+            currentTrack: trackWithGenre,
+            queue: newQueue,
             isPlaying: true,
             playbackPosition: 0
           });
@@ -609,16 +642,70 @@ export function useMusicStore() {
       }
     },
 
+    toggleAiAutoplay: (enabled?: boolean) => {
+      const nextVal = enabled !== undefined ? enabled : !globalState.aiAutoplayEnabled;
+      if (nextVal && globalState.currentTrack && globalState.queue.length <= 1) {
+        const aiTracks = RecommendationService.getAIGenreSuggestions(
+          globalState.currentTrack,
+          8,
+          [globalState.currentTrack.id]
+        );
+        updateState({ aiAutoplayEnabled: nextVal, queue: aiTracks });
+      } else {
+        updateState({ aiAutoplayEnabled: nextVal });
+      }
+    },
+
+    refreshAIGenreQueue: () => {
+      if (!globalState.currentTrack) return;
+      const aiTracks = RecommendationService.getAIGenreSuggestions(
+        globalState.currentTrack,
+        8,
+        [globalState.currentTrack.id]
+      );
+      updateState({ queue: aiTracks });
+    },
+
     nextTrack: () => {
       if (globalState.queue.length > 0) {
         const next = globalState.queue[0];
-        const newQueue = globalState.queue.slice(1);
+        let newQueue = globalState.queue.slice(1);
         const newHistory = globalState.currentTrack
           ? [globalState.currentTrack, ...globalState.history]
           : globalState.history;
 
+        // If AI Autoplay is enabled and queue is getting low (<= 2 tracks remaining),
+        // automatically append more matching tracks of the same genre!
+        if (globalState.aiAutoplayEnabled && newQueue.length <= 2) {
+          const excludeIds = [
+            next.id,
+            ...newQueue.map((t) => t.id),
+            ...newHistory.slice(0, 15).map((t) => t.id)
+          ];
+          const moreTracks = RecommendationService.getAIGenreSuggestions(next, 6, excludeIds);
+          newQueue = [...newQueue, ...moreTracks];
+        }
+
         updateState({ queue: newQueue, history: newHistory });
-        actions.playTrack(next);
+        actions.playTrack(next, { keepQueue: true });
+      } else if (globalState.aiAutoplayEnabled && globalState.currentTrack) {
+        // Queue was empty! Dynamically auto-suggest next track of the SAME genre
+        const excludeIds = [
+          globalState.currentTrack.id,
+          ...globalState.history.slice(0, 20).map((t) => t.id)
+        ];
+        const nextSuggestions = RecommendationService.getAIGenreSuggestions(
+          globalState.currentTrack,
+          6,
+          excludeIds
+        );
+        if (nextSuggestions.length > 0) {
+          const next = nextSuggestions[0];
+          const remaining = nextSuggestions.slice(1);
+          const newHistory = [globalState.currentTrack, ...globalState.history];
+          updateState({ queue: remaining, history: newHistory });
+          actions.playTrack(next, { keepQueue: true });
+        }
       }
     },
 
@@ -627,7 +714,7 @@ export function useMusicStore() {
         const prev = globalState.history[0];
         const newHistory = globalState.history.slice(1);
         updateState({ history: newHistory });
-        actions.playTrack(prev);
+        actions.playTrack(prev, { keepQueue: true });
       } else {
         actions.seek(0);
       }

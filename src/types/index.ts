@@ -71,6 +71,9 @@ export interface Track {
   votes: number;
   votedUserIds?: string[];
   dropTime?: number; // timestamp in seconds where the drop/chorus starts (Hook Drop mode)
+  genre?: string;
+  aiGenreMatch?: string; // Standardized genre tag like "Punjabi Pop", "R&B / Synthpop", etc.
+  isAiSuggested?: boolean; // Flag indicating track was auto-queued by AI Smart Radio
 }
 
 export interface Participant {

@@ -10,7 +10,8 @@ import {
   Zap,
   Radio,
   Sliders,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { EqualizerBars } from '../common/EqualizerBars';
@@ -20,6 +21,8 @@ export const PlayerBar: React.FC = () => {
   const track = state.currentTrack;
 
   if (!track) return null;
+
+  const nextTrack = state.queue.length > 0 ? state.queue[0] : null;
 
   const formatTime = (secs: number) => {
     if (isNaN(secs)) return '0:00';
@@ -66,7 +69,16 @@ export const PlayerBar: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{track.artist}</p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                {state.activeAIGenre && (
+                  <span
+                    className="text-[9px] font-mono font-bold text-emerald-600 dark:text-[#D4FF00] bg-emerald-500/10 dark:bg-[#D4FF00]/10 border border-emerald-500/25 dark:border-[#D4FF00]/25 px-1 py-0.2 rounded flex items-center gap-0.5 truncate max-w-[125px]"
+                    title={`AI Genre: ${state.activeAIGenre}`}
+                  >
+                    <Sparkles className="w-2.5 h-2.5 shrink-0" />
+                    <span className="truncate">{state.activeAIGenre}</span>
+                  </span>
+                )}
                 {state.dropMode && (
                   <span className="text-[9px] font-mono font-bold text-[#059669] dark:text-[#D4FF00] flex items-center gap-0.5">
                     <Zap className="w-2.5 h-2.5" />
@@ -151,6 +163,24 @@ export const PlayerBar: React.FC = () => {
               <Zap className="w-3 h-3" />
               <span className="hidden sm:inline">Drop Mode</span>
             </button>
+
+            {/* AI Genre Radio Autoplay Toggle */}
+            <button
+              onClick={() => actions.toggleAiAutoplay()}
+              className={`p-1 sm:px-2.5 sm:py-0.5 rounded text-[11px] font-mono uppercase flex items-center gap-1 transition-all border ${
+                state.aiAutoplayEnabled
+                  ? 'bg-emerald-600/15 text-emerald-600 dark:bg-[#D4FF00]/15 dark:text-[#D4FF00] border-emerald-500/40 dark:border-[#D4FF00]/40 font-bold shadow-xs'
+                  : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+              }`}
+              title={
+                state.aiAutoplayEnabled && nextTrack
+                  ? `AI Genre Radio ON: ${state.activeAIGenre}\nUp Next (Same Genre): ${nextTrack.title} · ${nextTrack.artist}`
+                  : 'Toggle AI Genre Radio & Autoplay'
+              }
+            >
+              <Sparkles className={`w-3 h-3 ${state.aiAutoplayEnabled ? 'text-emerald-500 dark:text-[#D4FF00] animate-pulse' : 'text-zinc-400'}`} />
+              <span className="hidden sm:inline">AI Radio</span>
+            </button>
           </div>
 
           {/* Time Scrubber */}
@@ -170,6 +200,22 @@ export const PlayerBar: React.FC = () => {
               {formatTime(state.duration)}
             </span>
           </div>
+
+          {/* AI Up Next preview pill below scrubber */}
+          {nextTrack && (
+            <div className="hidden md:flex items-center justify-between w-full mt-1 text-[10px] font-mono text-zinc-400 dark:text-zinc-500 px-1">
+              <span className="flex items-center gap-1.5 truncate max-w-sm">
+                <Sparkles className="w-2.5 h-2.5 text-emerald-500 dark:text-[#D4FF00] shrink-0" />
+                <span className="font-semibold text-zinc-600 dark:text-zinc-300">Up Next:</span>
+                <span className="truncate text-zinc-900 dark:text-white font-medium">{nextTrack.title}</span>
+                <span className="text-zinc-400">·</span>
+                <span className="truncate">{nextTrack.artist}</span>
+              </span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-emerald-600 dark:text-[#D4FF00] border border-zinc-200 dark:border-zinc-700 shrink-0 font-bold">
+                ✨ {state.activeAIGenre || 'Genre Match'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right: Tools & Volume */}
