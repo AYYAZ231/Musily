@@ -25,16 +25,16 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 select-none animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-display font-bold text-zinc-900 dark:text-white">Your Playlists</h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Curated party sets from Spotify and YouTube</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Curated high-energy party sets and custom mixes</p>
         </div>
 
         <button
           onClick={onOpenAccountModal}
-          className="px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs font-semibold transition-colors shadow-sm"
+          className="px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs font-semibold transition-all active:scale-95 shadow-sm"
         >
           + Import Playlist
         </button>
@@ -45,17 +45,17 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
           <div
             key={pl.id}
             onClick={() => handlePlayPlaylist(pl)}
-            className="p-3.5 rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all cursor-pointer group flex flex-col justify-between shadow-sm"
+            className="p-3.5 rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer group flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-3 bg-zinc-100 dark:bg-zinc-800">
                 <img
                   src={pl.coverUrl}
                   alt={pl.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <button
-                  className="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-full bg-white text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-105"
+                  className="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-full bg-white text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md hover:scale-110 active:scale-95"
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePlayPlaylist(pl);
@@ -66,17 +66,8 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({ onOpenAccountModal
               </div>
 
               <div className="flex items-center gap-2 mb-1">
-                <span
-                  className={`text-[9px] font-mono uppercase px-1.5 py-0.2 rounded border font-semibold ${
-                    pl.source === 'spotify'
-                      ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                      : 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10'
-                  }`}
-                >
-                  {pl.source === 'spotify' ? 'Spotify' : 'YouTube'}
-                </span>
                 <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
-                  {pl.trackCount} tracks
+                  {pl.trackCount} tracks · Drop Ready
                 </span>
               </div>
 

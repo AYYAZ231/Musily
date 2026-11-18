@@ -9,9 +9,10 @@ import {
   Volume2,
   VolumeX,
   Radio,
-  ChevronUp
+  Disc3
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
+import { EqualizerBars } from '../common/EqualizerBars';
 
 export const FullPlayerModal: React.FC = () => {
   const { state, actions } = useMusicStore();
@@ -29,11 +30,11 @@ export const FullPlayerModal: React.FC = () => {
   const emojis = ['🔥', '🔊', '🎉', '❤️', '💃', '⚡'];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white/95 dark:bg-[#0C0C0F]/95 backdrop-blur-2xl p-6 md:p-10 select-none animate-fadeIn transition-colors duration-200">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white/98 dark:bg-[#0C0C0F]/98 backdrop-blur-3xl p-6 md:p-10 select-none animate-fade-in transition-colors duration-200">
       {/* Top Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#10B981] dark:bg-[#D4FF00]" />
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] dark:bg-[#D4FF00] animate-pulse" />
           <span className="text-xs font-mono font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
             MUSILY NOW PLAYING
           </span>
@@ -46,7 +47,7 @@ export const FullPlayerModal: React.FC = () => {
 
         <button
           onClick={() => actions.setFullPlayerOpen(false)}
-          className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors border border-zinc-200 dark:border-zinc-700 shadow-sm"
+          className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-95 border border-zinc-200 dark:border-zinc-700 shadow-sm"
         >
           <X className="w-5 h-5" />
         </button>
@@ -54,13 +55,41 @@ export const FullPlayerModal: React.FC = () => {
 
       {/* Center Deck */}
       <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full my-auto">
-        {/* Cover Art */}
-        <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden shadow-lg mb-6 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-          <img
-            src={track.coverUrl}
-            alt={track.title}
-            className="w-full h-full object-cover"
-          />
+        {/* Animated Vinyl Artwork */}
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-6 flex items-center justify-center">
+          <div
+            className={`w-full h-full rounded-full p-3 bg-zinc-900 border-4 border-zinc-800 shadow-xl flex items-center justify-center relative overflow-hidden ${
+              state.isPlaying ? 'animate-vinyl' : ''
+            }`}
+          >
+            {/* Vinyl grooves */}
+            <div className="absolute inset-2 rounded-full border border-white/5 pointer-events-none" />
+            <div className="absolute inset-5 rounded-full border border-white/5 pointer-events-none" />
+            <div className="absolute inset-8 rounded-full border border-white/5 pointer-events-none" />
+            <div className="absolute inset-12 rounded-full border border-white/5 pointer-events-none" />
+
+            {/* Album Center Label */}
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden shadow-2xl relative z-10 border-2 border-zinc-700">
+              <img
+                src={track.coverUrl}
+                alt={track.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20" />
+              {/* Spindle hole */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-zinc-900 border border-white/20 shadow-inner" />
+            </div>
+          </div>
+
+          {/* Equalizer Wave Overlay badge */}
+          {state.isPlaying && (
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-md flex items-center gap-1.5 z-20">
+              <EqualizerBars isPlaying={true} size="md" />
+              <span className="text-[10px] font-mono font-bold text-zinc-800 dark:text-zinc-200">
+                PLAYING
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Title & Artist */}
@@ -69,25 +98,14 @@ export const FullPlayerModal: React.FC = () => {
             {track.title}
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{track.artist}</p>
-          <div className="flex items-center justify-center gap-2 pt-1">
-            <span
-              className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border font-semibold ${
-                track.source === 'spotify'
-                  ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                  : 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10'
-              }`}
-            >
-              {track.source === 'spotify' ? 'Spotify Catalog' : 'YouTube Music Stream'}
-            </span>
-          </div>
         </div>
 
-        {/* The Drop Mode Switch */}
+        {/* The Drop Mode Switch with glow */}
         <button
           onClick={actions.toggleDropMode}
-          className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all mb-6 flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-lg text-xs font-mono font-semibold border transition-all mb-6 flex items-center gap-1.5 ${
             state.dropMode
-              ? 'bg-[#10B981] text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold shadow-sm'
+              ? 'bg-[#10B981] text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold shadow-md animate-drop-glow'
               : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
@@ -115,7 +133,7 @@ export const FullPlayerModal: React.FC = () => {
         <div className="flex items-center justify-center gap-8 mb-6">
           <button
             onClick={actions.prevTrack}
-            className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-90"
+            className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all active:scale-90"
           >
             <SkipBack className="w-5 h-5" />
           </button>
@@ -133,7 +151,7 @@ export const FullPlayerModal: React.FC = () => {
 
           <button
             onClick={actions.nextTrack}
-            className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-90"
+            className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all active:scale-90"
           >
             <SkipForward className="w-5 h-5" />
           </button>
@@ -146,7 +164,7 @@ export const FullPlayerModal: React.FC = () => {
               <button
                 key={emoji}
                 onClick={() => actions.sendReaction(emoji)}
-                className="text-xl p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 transition-transform active:scale-90"
+                className="text-xl p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 transition-all active:scale-90 hover:-translate-y-1"
               >
                 {emoji}
               </button>

@@ -11,6 +11,7 @@ import {
   Radio
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
+import { EqualizerBars } from '../common/EqualizerBars';
 
 export const PlayerBar: React.FC = () => {
   const { state, actions } = useMusicStore();
@@ -44,8 +45,15 @@ export const PlayerBar: React.FC = () => {
             <img
               src={track.coverUrl}
               alt={track.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                state.isPlaying ? 'scale-105' : ''
+              }`}
             />
+            {state.isPlaying && (
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                <EqualizerBars isPlaying={true} size="sm" />
+              </div>
+            )}
           </div>
 
           <div className="min-w-0 truncate">
@@ -55,20 +63,17 @@ export const PlayerBar: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{track.artist}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span
-                className={`text-[9px] font-mono uppercase px-1.5 py-0.2 rounded border font-semibold ${
-                  track.source === 'spotify'
-                    ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                    : 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10'
-                }`}
-              >
-                {track.source === 'spotify' ? 'Spotify' : 'YouTube'}
-              </span>
+            <div className="flex items-center gap-2 mt-0.5">
+              {state.dropMode && (
+                <span className="text-[9px] font-mono font-bold text-[#059669] dark:text-[#D4FF00] flex items-center gap-0.5">
+                  <Zap className="w-2.5 h-2.5" />
+                  Hook Drop
+                </span>
+              )}
               {state.isPartyActive && (
-                <span className="text-[9px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold flex items-center gap-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-pulse" />
-                  Synced
+                <span className="text-[9px] font-mono text-emerald-600 dark:text-[#D4FF00] font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#D4FF00] animate-ping" />
+                  Party Synced
                 </span>
               )}
             </div>
@@ -81,16 +86,16 @@ export const PlayerBar: React.FC = () => {
             {/* Previous */}
             <button
               onClick={actions.prevTrack}
-              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-95"
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all active:scale-90"
               title="Previous"
             >
               <SkipBack className="w-4 h-4" />
             </button>
 
-            {/* Play/Pause */}
+            {/* Play/Pause with smooth scale */}
             <button
               onClick={actions.togglePlay}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
               title={state.isPlaying ? 'Pause' : 'Play'}
             >
               {state.isPlaying ? (
@@ -103,18 +108,18 @@ export const PlayerBar: React.FC = () => {
             {/* Next */}
             <button
               onClick={actions.nextTrack}
-              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors active:scale-95"
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all active:scale-90"
               title="Next"
             >
               <SkipForward className="w-4 h-4" />
             </button>
 
-            {/* Drop / Hook Toggle */}
+            {/* Drop / Hook Toggle with pulse */}
             <button
               onClick={actions.toggleDropMode}
-              className={`p-1 sm:px-2 sm:py-0.5 rounded text-[11px] font-mono uppercase flex items-center gap-1 transition-all border ${
+              className={`p-1 sm:px-2.5 sm:py-0.5 rounded text-[11px] font-mono uppercase flex items-center gap-1 transition-all border ${
                 state.dropMode
-                  ? 'bg-emerald-600 text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold'
+                  ? 'bg-emerald-600 text-white dark:bg-[#D4FF00] dark:text-black border-transparent font-bold shadow-sm animate-drop-glow'
                   : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
               title="The Hook / Drop: Skip intros and jump straight to the drop"
@@ -149,10 +154,10 @@ export const PlayerBar: React.FC = () => {
           {state.isPartyActive && (
             <button
               onClick={() => actions.setActiveTab('party')}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:border-zinc-400"
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 transition-colors"
             >
               <Radio className="w-3.5 h-3.5 text-emerald-600 dark:text-[#D4FF00]" />
-              <span>{state.hasAux ? 'You have Aux' : 'Listening'}</span>
+              <span>{state.hasAux ? 'You hold Aux' : 'Listening'}</span>
             </button>
           )}
 
@@ -178,8 +183,8 @@ export const PlayerBar: React.FC = () => {
           {/* Full Player Modal Button */}
           <button
             onClick={() => actions.setFullPlayerOpen(true)}
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            title="Expand View"
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-90"
+            title="Expand Full View"
           >
             <Maximize2 className="w-4 h-4" />
           </button>

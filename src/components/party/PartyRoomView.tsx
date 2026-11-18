@@ -15,6 +15,7 @@ import {
   Plus
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
+import { EqualizerBars } from '../common/EqualizerBars';
 
 interface PartyRoomViewProps {
   onOpenPassAux: () => void;
@@ -205,11 +206,18 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
           {state.currentTrack && (
             <div className="p-4 rounded-xl bg-white dark:bg-[#121216] border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <img
-                  src={state.currentTrack.coverUrl}
-                  alt=""
-                  className="w-12 h-12 rounded-lg object-cover shrink-0 bg-zinc-100 dark:bg-zinc-800 shadow-sm"
-                />
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 shadow-sm">
+                  <img
+                    src={state.currentTrack.coverUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  {state.isPlaying && (
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <EqualizerBars isPlaying={true} size="sm" />
+                    </div>
+                  )}
+                </div>
                 <div className="min-w-0">
                   <span className="text-[10px] font-mono uppercase text-[#059669] dark:text-[#D4FF00] font-bold">
                     ON THE AUX RIGHT NOW
@@ -242,7 +250,7 @@ export const PartyRoomView: React.FC<PartyRoomViewProps> = ({ onOpenPassAux, onO
                   onClick={onOpenSearch}
                   className="px-4 py-2 rounded-lg bg-[#10B981] hover:bg-[#059669] dark:bg-[#D4FF00] dark:hover:bg-[#C4ED00] text-white dark:text-black text-xs font-bold transition-all shadow-sm"
                 >
-                  Suggest Songs from Spotify / YouTube
+                  Suggest Tracks for the Aux
                 </button>
               </div>
             ) : (
