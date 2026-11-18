@@ -98,13 +98,13 @@ export class AIAudioService {
         bands.b64 = 9;
         bands.b125 = 6;
         bassBoost = 9;
-        explanations.push('boosted 32Hz & 64Hz sub-bass (+9 to +10 dB) for visceral kick impact');
+        explanations.push('punchy sub-bass boost');
       } else {
         bands.b32 = 6;
         bands.b64 = 5;
         bands.b125 = 4;
         bassBoost = 6;
-        explanations.push('elevated low-end (+5 dB) for warm low-end foundation');
+        explanations.push('warm low-end lift');
       }
     }
 
@@ -114,14 +114,14 @@ export class AIAudioService {
       bands.b2k = Math.max(bands.b2k, 6);
       bands.b4k = Math.max(bands.b4k, 5);
       bands.b250 = Math.min(bands.b250, 0); // cut mud
-      explanations.push('carved 250Hz boxiness and boosted 1k-4kHz for upfront vocal presence');
+      explanations.push('crystal vocal clarity');
     }
 
     // Analyze Treble, Sparkle & Air
     if (text.includes('bright') || text.includes('crisp') || text.includes('treble') || text.includes('high') || text.includes('sparkle') || text.includes('air')) {
       bands.b8k = Math.max(bands.b8k, 6);
       bands.b16k = Math.max(bands.b16k, 7);
-      explanations.push('enhanced 8kHz and 16kHz air frequencies for sparkling high-fidelity detail');
+      explanations.push('sparkling high-end air');
     }
 
     // Analyze Chill, Lo-Fi, Tape, Mellow
@@ -132,7 +132,7 @@ export class AIAudioService {
       bands.b16k = -8;
       bassBoost = 5;
       spatial = 'off';
-      explanations.push('rolled off harsh digital frequencies above 8kHz and saturated 125-250Hz for vintage tube warmth');
+      explanations.push('warm analog tape roll-off');
     }
 
     // Analyze Concert, Live, Arena, 3D Spatial
@@ -141,7 +141,7 @@ export class AIAudioService {
       preamp = 2;
       bands.b64 = Math.max(bands.b64, 7);
       bands.b4k = Math.max(bands.b4k, 5);
-      explanations.push('broadened stereo imaging with Concert Arena 3D reverb simulation');
+      explanations.push('3D concert stage acoustics');
     }
 
     // Analyze Car audio or Party
@@ -153,7 +153,7 @@ export class AIAudioService {
       bassBoost = 8;
       preamp = 2;
       spatial = 'concert';
-      explanations.push('applied V-curve contour with anti-resonator cut at 500Hz for high volume clarity');
+      explanations.push('high-impact V-curve club contour');
     }
 
     // Default fallback if no specific keywords
@@ -164,10 +164,10 @@ export class AIAudioService {
       bands.b4k = 3;
       bands.b8k = 4;
       bassBoost = 4;
-      explanations.push('applied dynamic multi-band harmonic equalization tailored to current acoustic acoustics');
+      explanations.push('balanced harmonic multi-band tuning');
     }
 
-    const insight = `AI Neural Tuning applied: ${explanations.join(', ')}.`;
+    const insight = `Tuned for ${explanations.join(', ')}.`;
 
     return {
       bands,
