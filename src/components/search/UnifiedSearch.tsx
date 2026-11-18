@@ -277,22 +277,6 @@ export const UnifiedSearch: React.FC = () => {
                         >
                           {track.title}
                         </p>
-
-                        {/* Real Provider Badge */}
-                        <span
-                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold border shrink-0 flex items-center gap-1 ${
-                            isSpotify
-                              ? 'bg-[#1DB954]/10 text-[#1DB954] border-[#1DB954]/30'
-                              : 'bg-[#FF0000]/10 text-[#FF0000] border-[#FF0000]/30'
-                          }`}
-                        >
-                          {isSpotify ? (
-                            <SpotifyIcon className="w-2.5 h-2.5" />
-                          ) : (
-                            <YouTubeIcon className="w-2.5 h-2.5" />
-                          )}
-                          <span>{isSpotify ? 'Spotify' : 'YouTube'}</span>
-                        </span>
                       </div>
 
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">

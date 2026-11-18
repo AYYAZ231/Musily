@@ -6,6 +6,7 @@ import { SpotifyService, FEATURED_SPOTIFY_TRACKS } from '../services/spotifyServ
 import { YouTubeService, FEATURED_YOUTUBE_TRACKS } from '../services/youtubeService';
 import { DEFAULT_EQUALIZER_BANDS, EQUALIZER_PRESETS, AIAudioService } from '../services/aiAudioService';
 import { AuthService } from '../services/authService';
+import { RecommendationService } from '../services/recommendationService';
 import confetti from 'canvas-confetti';
 
 interface MusicStoreState {
@@ -489,7 +490,14 @@ export function useMusicStore() {
 
     playTrack: (track: Track) => {
       player.loadTrack(track, true);
-      updateState({ currentTrack: track, isPlaying: true });
+      RecommendationService.recordListen(track);
+
+      const existingHistory = globalState.history.filter((t) => t.id !== track.id);
+      updateState({
+        currentTrack: track,
+        isPlaying: true,
+        history: [track, ...existingHistory].slice(0, 30)
+      });
 
       if (globalState.isPartyActive && (globalState.isHost || globalState.hasAux)) {
         if (globalState.partyRoom) {

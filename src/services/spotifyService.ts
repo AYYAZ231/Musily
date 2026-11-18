@@ -151,8 +151,8 @@ export const FEATURED_SPOTIFY_TRACKS: Track[] = [
 export const FEATURED_SPOTIFY_PLAYLISTS: Playlist[] = [
   {
     id: 'sp_pl_1',
-    name: 'Spotify Viral Hits & Party Mix 🔥',
-    description: 'High-octane Bollywood, Punjabi & EDM party drops that never let the vibe die down.',
+    name: 'Viral Hits & Party Mix 🔥',
+    description: 'High-octane party drops and chart-toppers that never let the vibe die down.',
     coverUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
     source: 'spotify',
     trackCount: 12,
@@ -161,7 +161,7 @@ export const FEATURED_SPOTIFY_PLAYLISTS: Playlist[] = [
   {
     id: 'sp_pl_2',
     name: 'Global Top 50 Chartbusters',
-    description: 'The hottest tracks trending across Spotify worldwide right now.',
+    description: 'The hottest tracks trending across the world right now.',
     coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
     source: 'spotify',
     trackCount: 50,
@@ -173,10 +173,44 @@ export class SpotifyService {
   private static readonly CLIENT_ID_KEY = 'musily_spotify_client_id';
   private static readonly TOKEN_KEY = 'musily_spotify_token';
   private static readonly USER_KEY = 'musily_spotify_user';
+  private static readonly RECENTS_KEY = 'musily_spotify_recents';
 
   // Check if Spotify is connected
   static isConnected(): boolean {
     return !!localStorage.getItem(this.TOKEN_KEY) || !!localStorage.getItem(this.USER_KEY);
+  }
+
+  // Get recently played Spotify tracks
+  static getRecentTracks(): Track[] {
+    try {
+      const raw = localStorage.getItem(this.RECENTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+
+    // If connected to Spotify, provide initial recent favorites based on active profile
+    const profile = this.getProfile();
+    if (profile) {
+      return [
+        FEATURED_SPOTIFY_TRACKS[0], // Starboy
+        FEATURED_SPOTIFY_TRACKS[1], // Blinding Lights
+        FEATURED_SPOTIFY_TRACKS[2], // Brown Munde
+        FEATURED_SPOTIFY_TRACKS[6]  // Espresso
+      ];
+    }
+    return [FEATURED_SPOTIFY_TRACKS[0], FEATURED_SPOTIFY_TRACKS[1]];
+  }
+
+  // Record a Spotify track listen
+  static recordRecent(track: Track): void {
+    try {
+      const current = this.getRecentTracks();
+      const filtered = current.filter((t) => t.id !== track.id);
+      const updated = [track, ...filtered].slice(0, 20);
+      localStorage.setItem(this.RECENTS_KEY, JSON.stringify(updated));
+    } catch {}
   }
 
   // Get saved profile

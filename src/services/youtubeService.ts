@@ -3,7 +3,7 @@ import { Track, Playlist } from '../types';
 export const FEATURED_YOUTUBE_TRACKS: Track[] = [
   {
     id: 'yt_1',
-    title: 'Tauba Tauba (Official Video)',
+    title: 'Tauba Tauba',
     artist: 'Karan Aujla, Vicky Kaushal',
     album: 'Bad Newz',
     duration: 206,
@@ -150,8 +150,8 @@ export const FEATURED_YOUTUBE_TRACKS: Track[] = [
 export const FEATURED_YOUTUBE_PLAYLISTS: Playlist[] = [
   {
     id: 'yt_pl_1',
-    name: 'YouTube Music - Party Trending ⚡',
-    description: 'The most streamed Hindi, Punjabi & International party music on YouTube Music.',
+    name: 'Trending Party Energy ⚡',
+    description: 'The most streamed Hindi, Punjabi & International party music that keeps the room buzzing.',
     coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
     source: 'youtube',
     trackCount: 12,
@@ -159,8 +159,8 @@ export const FEATURED_YOUTUBE_PLAYLISTS: Playlist[] = [
   },
   {
     id: 'yt_pl_2',
-    name: 'YouTube Music - Global Viral Video Drops 🎥',
-    description: 'Chart-dominating official music video drops and worldwide viral sensations.',
+    name: 'Global Viral Drops 🎥',
+    description: 'Chart-dominating high-energy tracks and worldwide viral sensations.',
     coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
     source: 'youtube',
     trackCount: 12,
@@ -170,9 +170,43 @@ export const FEATURED_YOUTUBE_PLAYLISTS: Playlist[] = [
 
 export class YouTubeService {
   private static readonly USER_KEY = 'musily_yt_user';
+  private static readonly RECENTS_KEY = 'musily_yt_recents';
 
   static isConnected(): boolean {
     return !!localStorage.getItem(this.USER_KEY);
+  }
+
+  // Get recently played YouTube tracks
+  static getRecentTracks(): Track[] {
+    try {
+      const raw = localStorage.getItem(this.RECENTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+
+    // If connected to YouTube, provide recent favorites based on active channel
+    const profile = this.getProfile();
+    if (profile) {
+      return [
+        FEATURED_YOUTUBE_TRACKS[0], // Tauba Tauba
+        FEATURED_YOUTUBE_TRACKS[1], // Obsessed
+        FEATURED_YOUTUBE_TRACKS[3], // Proper Patola
+        FEATURED_YOUTUBE_TRACKS[6]  // Kinni Kinni
+      ];
+    }
+    return [FEATURED_YOUTUBE_TRACKS[0], FEATURED_YOUTUBE_TRACKS[1]];
+  }
+
+  // Record a YouTube track listen
+  static recordRecent(track: Track): void {
+    try {
+      const current = this.getRecentTracks();
+      const filtered = current.filter((t) => t.id !== track.id);
+      const updated = [track, ...filtered].slice(0, 20);
+      localStorage.setItem(this.RECENTS_KEY, JSON.stringify(updated));
+    } catch {}
   }
 
   static getProfile() {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Play,
   Pause,
@@ -13,29 +13,36 @@ import {
   Disc3,
   Sliders,
   ListPlus,
-  ExternalLink,
   Layers,
   CheckCircle2,
-  Share2
+  Clock,
+  Music
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FEATURED_SPOTIFY_TRACKS, FEATURED_SPOTIFY_PLAYLISTS } from '../../services/spotifyService';
 import { FEATURED_YOUTUBE_TRACKS, FEATURED_YOUTUBE_PLAYLISTS } from '../../services/youtubeService';
-import { SpotifyIcon, YouTubeIcon } from '../common/StreamingIcons';
+import { RecommendationService, RecentRecommendation } from '../../services/recommendationService';
 import { EqualizerBars } from '../common/EqualizerBars';
-import { Track, Playlist } from '../../types';
+import { Track } from '../../types';
 
 interface HomeViewProps {
   onOpenPartyModal: () => void;
   onOpenAccountModal: () => void;
 }
 
-type RecommendationFilter = 'all' | 'spotify' | 'youtube' | 'personalized';
+type RecommendationFilter = 'all' | 'recents' | 'chartbusters' | 'viral' | 'personalized';
 
 export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAccountModal }) => {
   const { state, actions } = useMusicStore();
   const [platformFilter, setPlatformFilter] = useState<RecommendationFilter>('all');
   const [selectedVibe, setSelectedVibe] = useState('all');
+  const [recentRecommendations, setRecentRecommendations] = useState<RecentRecommendation[]>([]);
+
+  // Refresh dynamic recommendations based on recent Spotify & YouTube listens
+  useEffect(() => {
+    const recs = RecommendationService.getRecommendationsFromRecents();
+    setRecentRecommendations(recs);
+  }, [state.currentTrack?.id, state.history.length]);
 
   const vibeCategories = [
     { id: 'all', label: '🔥 All Bangers', filter: () => true },
@@ -47,10 +54,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
   const currentVibeFilter = vibeCategories.find((v) => v.id === selectedVibe)?.filter || (() => true);
 
-  const filteredSpotifyTracks = FEATURED_SPOTIFY_TRACKS.filter(currentVibeFilter);
-  const filteredYouTubeTracks = FEATURED_YOUTUBE_TRACKS.filter(currentVibeFilter);
+  const filteredChartbusters = FEATURED_SPOTIFY_TRACKS.filter(currentVibeFilter);
+  const filteredViralDrops = FEATURED_YOUTUBE_TRACKS.filter(currentVibeFilter);
 
-  // Mixed curated list for the party table
+  // Curated list for the party table without platform mentions
   const mixedPartyDrops = [
     FEATURED_SPOTIFY_TRACKS[0], // Starboy
     FEATURED_YOUTUBE_TRACKS[0], // Tauba Tauba
@@ -89,7 +96,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
           HERO STAGE: Cinematic Editorial Banner & Interactive Spotlight
           ========================================================================= */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-6 sm:p-10 border border-zinc-800/80 shadow-2xl">
-        {/* Ambient Gradient Orbs behind hero */}
+        {/* Ambient Gradient Orbs */}
         <div className="absolute top-0 right-1/4 -mt-16 w-96 h-96 bg-emerald-500/15 dark:bg-[#D4FF00]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-10 -mb-20 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -113,7 +120,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                 </span>
               </h1>
               <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl font-normal">
-                Continuous high-energy music drops straight into the hook and chorus. Browse full recommendations from YouTube Music and Spotify, pass the Aux to friends live online, and upvote what plays next — 100% free with zero fees.
+                Continuous high-energy music drops straight into the hook and chorus. Dynamic recommendations tuned to your recent listening history, pass the Aux to friends live online, and upvote what plays next — 100% free with zero fees.
               </p>
             </div>
 
@@ -152,7 +159,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             </div>
           </div>
 
-          {/* Right Spotlight Vinyl Card */}
+          {/* Right Spotlight Vinyl Card (Clean: no provider branding on song/album) */}
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative group w-full max-w-sm p-4 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/15 shadow-2xl transition-all duration-300 hover:border-white/30">
               <div className="flex items-center justify-between mb-3">
@@ -161,11 +168,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   Spotlight Drop
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                    spotlightTrack.source === 'spotify' ? 'bg-[#1DB954]/20 text-[#1DB954]' : 'bg-[#FF0000]/20 text-[#FF0000]'
-                  }`}>
-                    {spotlightTrack.source === 'spotify' ? <SpotifyIcon className="w-3 h-3" /> : <YouTubeIcon className="w-3 h-3" />}
-                    {spotlightTrack.source === 'spotify' ? 'Spotify' : 'YouTube'}
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white font-mono">
+                    Curated
                   </span>
                   <span className="text-[10px] font-mono text-zinc-400">
                     ⚡ Hook @ {spotlightTrack.dropTime || 28}s
@@ -231,23 +235,23 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       </section>
 
       {/* =========================================================================
-          PRIMARY RECOMMENDATION SOURCE FILTER BAR
-          Allows instant switching between All, Spotify, YouTube & Personalized
+          RECOMMENDATION SOURCE & VIBE FILTER BAR
+          Clean categorized filters without platform badges on songs
           ========================================================================= */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-zinc-200 dark:border-zinc-800">
           <div>
             <h2 className="text-xl sm:text-2xl font-display font-black text-zinc-900 dark:text-white flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-emerald-500 dark:text-[#D4FF00]" />
-              <span>Discover Streaming Recommendations</span>
+              <span>Discover Music Recommendations</span>
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Live recommendations sourced directly from YouTube Music and Spotify official catalogs.
+              Dynamically adapted to your recent listening history and curated charts.
             </p>
           </div>
 
-          {/* Source Tabs */}
-          <div className="inline-flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 self-start sm:self-auto">
+          {/* Clean Recommendation Tabs */}
+          <div className="inline-flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 self-start sm:self-auto flex-wrap">
             <button
               onClick={() => setPlatformFilter('all')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -261,27 +265,39 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             </button>
 
             <button
-              onClick={() => setPlatformFilter('spotify')}
+              onClick={() => setPlatformFilter('recents')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                platformFilter === 'spotify'
-                  ? 'bg-[#1DB954] text-black shadow-xs'
-                  : 'text-zinc-500 hover:text-[#1DB954]'
+                platformFilter === 'recents'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-emerald-600'
               }`}
             >
-              <SpotifyIcon className="w-3.5 h-3.5" />
-              <span>Spotify ({FEATURED_SPOTIFY_TRACKS.length})</span>
+              <Clock className="w-3.5 h-3.5" />
+              <span>Based on Your Recents</span>
             </button>
 
             <button
-              onClick={() => setPlatformFilter('youtube')}
+              onClick={() => setPlatformFilter('chartbusters')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                platformFilter === 'youtube'
-                  ? 'bg-[#FF0000] text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-[#FF0000]'
+                platformFilter === 'chartbusters'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-amber-500'
               }`}
             >
-              <YouTubeIcon className="w-3.5 h-3.5" />
-              <span>YouTube ({FEATURED_YOUTUBE_TRACKS.length})</span>
+              <Flame className="w-3.5 h-3.5" />
+              <span>Chartbusters ({FEATURED_SPOTIFY_TRACKS.length})</span>
+            </button>
+
+            <button
+              onClick={() => setPlatformFilter('viral')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                platformFilter === 'viral'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-cyan-600'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Viral Drops ({FEATURED_YOUTUBE_TRACKS.length})</span>
             </button>
 
             <button
@@ -317,55 +333,188 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       </section>
 
       {/* =========================================================================
-          SECTION: PERSONALIZED MIX & ACCOUNT SYNC
+          PRIMARY DYNAMIC SECTION: BASED ON YOUR RECENT LISTENS
+          Dynamically tuned to user's recent Spotify and YouTube listening history
+          ========================================================================= */}
+      {(platformFilter === 'all' || platformFilter === 'recents') && recentRecommendations.length > 0 && (
+        <section className="space-y-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-500/[0.06] via-zinc-900/[0.02] to-teal-500/[0.06] dark:from-emerald-500/[0.09] dark:to-teal-500/[0.09] border border-emerald-500/25 dark:border-emerald-500/35 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
+                <h3 className="text-base sm:text-lg font-display font-extrabold text-zinc-900 dark:text-white">
+                  Based on Your Recent Listens
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-[#D4FF00] text-[10px] font-mono font-bold border border-emerald-500/20">
+                  Adaptive Engine
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Recommendations automatically adapt whenever you play or stream songs from your connected accounts.
+              </p>
+            </div>
+
+            {/* Quick Batch Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePlayAll(recentRecommendations.map((r) => r.track))}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Play Recents Mix</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Recent Recommendations Grid (Clean: zero platform labels on cards) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3.5 pt-1">
+            {recentRecommendations.map((item) => {
+              const track = item.track;
+              const isCurrent = state.currentTrack?.id === track.id;
+              const isPlaying = isCurrent && state.isPlaying;
+
+              return (
+                <div
+                  key={`rec_${track.id}`}
+                  onClick={() => actions.playTrack(track)}
+                  className={`group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs ${
+                    isCurrent
+                      ? 'border-emerald-500 ring-1 ring-emerald-500/30 shadow-md'
+                      : 'border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/50'
+                  }`}
+                >
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-900 mb-2.5 shadow-xs">
+                    <img
+                      src={track.coverUrl}
+                      alt={track.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
+                    />
+
+                    {/* Hook Drop Cue Badge */}
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
+                      ⚡ 0:{track.dropTime || 28}
+                    </div>
+
+                    {/* Inspired by badge on artwork */}
+                    <div className="absolute bottom-2 left-2 right-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur-md text-[10px] text-zinc-200 font-medium truncate border border-white/10">
+                      ✨ {item.inspiredBy}
+                    </div>
+
+                    {/* Floating Play Overlay */}
+                    <div className={`absolute inset-0 bg-black/35 flex items-center justify-center transition-opacity duration-300 ${
+                      isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isCurrent) {
+                            actions.togglePlay();
+                          } else {
+                            actions.playTrack(track);
+                          }
+                        }}
+                        className="w-11 h-11 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-all hover:scale-105 active:scale-95"
+                      >
+                        {isPlaying ? (
+                          <Pause className="w-5 h-5 fill-current" />
+                        ) : (
+                          <Play className="w-5 h-5 fill-current ml-0.5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Live Equalizer indicator when playing */}
+                    {isPlaying && (
+                      <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-emerald-500/40 flex items-center gap-1">
+                        <EqualizerBars isPlaying={true} size="sm" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <h4
+                      className={`text-xs font-bold truncate transition-colors ${
+                        isCurrent
+                          ? 'text-emerald-600 dark:text-[#D4FF00]'
+                          : 'text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-[#D4FF00]'
+                      }`}
+                      title={track.title}
+                    >
+                      {track.title}
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate" title={track.artist}>
+                      {track.artist}
+                    </p>
+
+                    {/* Action Footer */}
+                    <div className="flex items-center justify-between pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => actions.addToQueue(track)}
+                        className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1 text-[10px] font-semibold"
+                        title="Add to Next Up Queue"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Queue</span>
+                      </button>
+
+                      <button
+                        onClick={() => actions.voteTrack(track.id)}
+                        className="p-1 rounded-md text-zinc-400 hover:text-emerald-600 dark:hover:text-[#D4FF00] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
+                        title="Upvote on Aux"
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                        <span>{track.votes}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* =========================================================================
+          SECTION: PERSONALIZED FOR YOU (CONNECTED PROFILES)
           Visible in 'all' or 'personalized' views
           ========================================================================= */}
       {(platformFilter === 'all' || platformFilter === 'personalized') && (
-        <section className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-500/[0.05] via-zinc-900/[0.02] to-cyan-500/[0.05] dark:from-emerald-500/[0.08] dark:to-cyan-500/[0.08] border border-emerald-500/20 dark:border-emerald-500/30 shadow-sm relative overflow-hidden space-y-4">
+        <section className="p-5 sm:p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-emerald-500 dark:text-[#D4FF00]" />
                 <h3 className="text-base sm:text-lg font-display font-extrabold text-zinc-900 dark:text-white">
-                  Curated For Your Connected Accounts
+                  Curated For Your Taste
                 </h3>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                AI recommendations combined from your active Spotify & YouTube streaming profiles.
+                Personalized selections based on your streaming profile preferences.
               </p>
             </div>
 
-            {/* Badges or Connect CTA */}
+            {/* Account Status Badges or Link Trigger */}
             <div className="flex flex-wrap items-center gap-2">
-              {isSpotifyConnected ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1DB954]/15 border border-[#1DB954]/30 text-[#1DB954] text-xs font-mono font-bold">
-                  <SpotifyIcon className="w-3.5 h-3.5" />
+              {isSpotifyConnected && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
                   <span>@{state.linkedAccounts.spotify.username}</span>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#1DB954]" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                 </div>
-              ) : (
-                <button
-                  onClick={onOpenAccountModal}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 transition-colors"
-                >
-                  <SpotifyIcon className="w-3.5 h-3.5 text-[#1DB954]" />
-                  <span>Link Spotify</span>
-                </button>
               )}
 
-              {isYouTubeConnected ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF0000]/15 border border-[#FF0000]/30 text-[#FF0000] text-xs font-mono font-bold">
-                  <YouTubeIcon className="w-3.5 h-3.5" />
+              {isYouTubeConnected && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-mono font-bold">
                   <span>@{state.linkedAccounts.youtube.channelTitle}</span>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#FF0000]" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-red-500" />
                 </div>
-              ) : (
+              )}
+
+              {(!isSpotifyConnected || !isYouTubeConnected) && (
                 <button
                   onClick={onOpenAccountModal}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 hover:border-red-500 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 transition-colors"
                 >
-                  <YouTubeIcon className="w-3.5 h-3.5 text-[#FF0000]" />
-                  <span>Link YouTube</span>
+                  <span>Connect Streaming Accounts</span>
                 </button>
               )}
 
@@ -373,12 +522,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                 onClick={onOpenAccountModal}
                 className="text-xs font-bold text-emerald-600 dark:text-[#D4FF00] hover:underline ml-1"
               >
-                Manage
+                Settings
               </button>
             </div>
           </div>
 
-          {/* Quick 4-card personalized preview */}
+          {/* Quick 4-card personalized preview (Clean: zero platform labels on cards) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-1">
             {[FEATURED_SPOTIFY_TRACKS[0], FEATURED_YOUTUBE_TRACKS[0], FEATURED_SPOTIFY_TRACKS[2], FEATURED_YOUTUBE_TRACKS[1]].map((recTrack) => {
               const isCurrent = state.currentTrack?.id === recTrack.id;
@@ -386,7 +535,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
               return (
                 <div
-                  key={recTrack.id}
+                  key={`curated_${recTrack.id}`}
                   onClick={() => actions.playTrack(recTrack)}
                   className="group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border border-zinc-200/90 dark:border-zinc-800/90 hover:border-emerald-500/40 dark:hover:border-[#D4FF00]/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs"
                 >
@@ -397,17 +546,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
 
-                    {/* Source Pill */}
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md flex items-center gap-1 text-[9px] font-bold text-white">
-                      {recTrack.source === 'spotify' ? (
-                        <SpotifyIcon className="w-2.5 h-2.5 text-[#1DB954]" />
-                      ) : (
-                        <YouTubeIcon className="w-2.5 h-2.5 text-[#FF0000]" />
-                      )}
-                      <span>{recTrack.source === 'spotify' ? 'Spotify' : 'YouTube'}</span>
-                    </div>
-
-                    <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-mono text-emerald-400 font-bold">
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-mono text-amber-300 font-bold border border-white/10">
                       ⚡ 0:{recTrack.dropTime}
                     </div>
 
@@ -439,27 +578,27 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       )}
 
       {/* =========================================================================
-          SECTION: SPOTIFY TOP RECOMMENDATIONS (12 CURATED CHARTBUSTERS)
-          Visible when platformFilter === 'all' || platformFilter === 'spotify'
+          SECTION: TOP CHARTBUSTERS & HIT DROPS (12 CURATED BANGERS)
+          Clean: Zero platform badges/mentions on songs and albums
           ========================================================================= */}
-      {(platformFilter === 'all' || platformFilter === 'spotify') && (
+      {(platformFilter === 'all' || platformFilter === 'chartbusters') && (
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#1DB954]/15 border border-[#1DB954]/30 flex items-center justify-center text-[#1DB954] shadow-xs">
-                <SpotifyIcon className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-xs">
+                <Flame className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg sm:text-xl font-display font-extrabold text-zinc-900 dark:text-white">
-                    Spotify Top Recommendations & Viral Hits
+                    Top Chartbusters & Global Hits
                   </h3>
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-[#1DB954]/10 text-[#1DB954] text-[10px] font-mono font-bold border border-[#1DB954]/20">
-                    Official Catalog
+                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-mono font-bold border border-amber-500/20">
+                    High Energy
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  Chart-topping worldwide hits, high-octane streaming drops, and club chartbusters.
+                  Chart-topping worldwide hits, high-octane streaming drops, and club anthems.
                 </p>
               </div>
             </div>
@@ -467,17 +606,17 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             {/* Quick Batch Actions */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handlePlayAll(filteredSpotifyTracks)}
-                className="px-3.5 py-1.5 rounded-xl bg-[#1DB954] hover:bg-[#1ed760] text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                onClick={() => handlePlayAll(filteredChartbusters)}
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Play All ({filteredSpotifyTracks.length})</span>
+                <span>Play All ({filteredChartbusters.length})</span>
               </button>
 
               <button
-                onClick={() => handleQueueAll(filteredSpotifyTracks)}
+                onClick={() => handleQueueAll(filteredChartbusters)}
                 className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold transition-all flex items-center gap-1"
-                title="Add all Spotify recommendations to party queue"
+                title="Add all to party queue"
               >
                 <ListPlus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Queue All</span>
@@ -485,9 +624,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             </div>
           </div>
 
-          {/* Spotify Recommendations Grid (Responsive 2 to 6 columns) */}
+          {/* Grid (Clean: no platform labels on artwork or titles) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-            {filteredSpotifyTracks.map((track) => {
+            {filteredChartbusters.map((track) => {
               const isCurrent = state.currentTrack?.id === track.id;
               const isPlaying = isCurrent && state.isPlaying;
 
@@ -497,23 +636,17 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   onClick={() => actions.playTrack(track)}
                   className={`group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs ${
                     isCurrent
-                      ? 'border-[#1DB954] ring-1 ring-[#1DB954]/30 shadow-md'
-                      : 'border-zinc-200/90 dark:border-zinc-800/90 hover:border-[#1DB954]/50'
+                      ? 'border-amber-500 ring-1 ring-amber-500/30 shadow-md'
+                      : 'border-zinc-200/90 dark:border-zinc-800/90 hover:border-amber-500/50'
                   }`}
                 >
-                  {/* Artwork Container */}
+                  {/* Artwork Container (Clean: zero provider tags) */}
                   <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-900 mb-2.5 shadow-xs">
                     <img
                       src={track.coverUrl}
                       alt={track.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
                     />
-
-                    {/* Top Spotify Brand Tag */}
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md flex items-center gap-1 text-[9px] font-bold text-[#1DB954] border border-[#1DB954]/30">
-                      <SpotifyIcon className="w-2.5 h-2.5" />
-                      <span>Spotify</span>
-                    </div>
 
                     {/* Hook Drop Cue Badge */}
                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
@@ -533,7 +666,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                             actions.playTrack(track);
                           }
                         }}
-                        className="w-11 h-11 rounded-full bg-[#1DB954] text-black flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-all hover:scale-105 active:scale-95"
+                        className="w-11 h-11 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-all hover:scale-105 active:scale-95"
                       >
                         {isPlaying ? (
                           <Pause className="w-5 h-5 fill-current" />
@@ -545,7 +678,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
                     {/* Live Equalizer indicator when playing */}
                     {isPlaying && (
-                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-[#1DB954]/40 flex items-center gap-1">
+                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-amber-500/40 flex items-center gap-1">
                         <EqualizerBars isPlaying={true} size="sm" />
                       </div>
                     )}
@@ -556,8 +689,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     <h4
                       className={`text-xs font-bold truncate transition-colors ${
                         isCurrent
-                          ? 'text-[#1DB954]'
-                          : 'text-zinc-900 dark:text-white group-hover:text-[#1DB954]'
+                          ? 'text-amber-500'
+                          : 'text-zinc-900 dark:text-white group-hover:text-amber-500'
                       }`}
                       title={track.title}
                     >
@@ -580,7 +713,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
                       <button
                         onClick={() => actions.voteTrack(track.id)}
-                        className="p-1 rounded-md text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
+                        className="p-1 rounded-md text-zinc-400 hover:text-amber-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
                         title="Upvote on Aux"
                       >
                         <ThumbsUp className="w-3 h-3" />
@@ -596,27 +729,27 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       )}
 
       {/* =========================================================================
-          SECTION: YOUTUBE MUSIC RECOMMENDATIONS (12 CURATED VIRAL DROPS & VIDEOS)
-          Visible when platformFilter === 'all' || platformFilter === 'youtube'
+          SECTION: VIRAL DROPS & VIDEO ANTHEMS (12 CURATED VIRAL BANGERS)
+          Clean: Zero platform badges/mentions on songs and albums
           ========================================================================= */}
-      {(platformFilter === 'all' || platformFilter === 'youtube') && (
+      {(platformFilter === 'all' || platformFilter === 'viral') && (
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#FF0000]/15 border border-[#FF0000]/30 flex items-center justify-center text-[#FF0000] shadow-xs">
-                <YouTubeIcon className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-500 shadow-xs">
+                <TrendingUp className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg sm:text-xl font-display font-extrabold text-zinc-900 dark:text-white">
-                    YouTube Music Recommendations & Viral Drops
+                    Viral Drops & Video Anthems
                   </h3>
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-[#FF0000]/10 text-[#FF0000] text-[10px] font-mono font-bold border border-[#FF0000]/20">
-                    Trending Video Catalog
+                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-500 text-[10px] font-mono font-bold border border-cyan-500/20">
+                    Worldwide Trending
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  High-energy official music video drops, Punjabi dance heaters, and viral YouTube anthems.
+                  High-energy dance heaters, Punjabi anthems, and worldwide trending sensations.
                 </p>
               </div>
             </div>
@@ -624,17 +757,17 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             {/* Quick Batch Actions */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handlePlayAll(filteredYouTubeTracks)}
-                className="px-3.5 py-1.5 rounded-xl bg-[#FF0000] hover:bg-[#e60000] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                onClick={() => handlePlayAll(filteredViralDrops)}
+                className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Play All ({filteredYouTubeTracks.length})</span>
+                <span>Play All ({filteredViralDrops.length})</span>
               </button>
 
               <button
-                onClick={() => handleQueueAll(filteredYouTubeTracks)}
+                onClick={() => handleQueueAll(filteredViralDrops)}
                 className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold transition-all flex items-center gap-1"
-                title="Add all YouTube recommendations to party queue"
+                title="Add all to party queue"
               >
                 <ListPlus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Queue All</span>
@@ -642,9 +775,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
             </div>
           </div>
 
-          {/* YouTube Recommendations Grid (Responsive 2 to 6 columns) */}
+          {/* Grid (Clean: no platform labels on artwork or titles) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-            {filteredYouTubeTracks.map((track) => {
+            {filteredViralDrops.map((track) => {
               const isCurrent = state.currentTrack?.id === track.id;
               const isPlaying = isCurrent && state.isPlaying;
 
@@ -654,23 +787,17 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   onClick={() => actions.playTrack(track)}
                   className={`group relative p-3 rounded-2xl bg-white dark:bg-[#0E0F14] border transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-xs ${
                     isCurrent
-                      ? 'border-[#FF0000] ring-1 ring-[#FF0000]/30 shadow-md'
-                      : 'border-zinc-200/90 dark:border-zinc-800/90 hover:border-[#FF0000]/50'
+                      ? 'border-cyan-500 ring-1 ring-cyan-500/30 shadow-md'
+                      : 'border-zinc-200/90 dark:border-zinc-800/90 hover:border-cyan-500/50'
                   }`}
                 >
-                  {/* Artwork Container */}
+                  {/* Artwork Container (Clean: zero provider tags) */}
                   <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-900 mb-2.5 shadow-xs">
                     <img
                       src={track.coverUrl}
                       alt={track.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
                     />
-
-                    {/* Top YouTube Brand Tag */}
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md flex items-center gap-1 text-[9px] font-bold text-[#FF0000] border border-[#FF0000]/30">
-                      <YouTubeIcon className="w-2.5 h-2.5" />
-                      <span>YouTube</span>
-                    </div>
 
                     {/* Hook Drop Cue Badge */}
                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono font-bold text-amber-300 border border-white/10">
@@ -690,7 +817,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                             actions.playTrack(track);
                           }
                         }}
-                        className="w-11 h-11 rounded-full bg-[#FF0000] text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-all hover:scale-105 active:scale-95"
+                        className="w-11 h-11 rounded-full bg-cyan-500 text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-all hover:scale-105 active:scale-95"
                       >
                         {isPlaying ? (
                           <Pause className="w-5 h-5 fill-current" />
@@ -702,7 +829,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
                     {/* Live Equalizer indicator when playing */}
                     {isPlaying && (
-                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-[#FF0000]/40 flex items-center gap-1">
+                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md border border-cyan-500/40 flex items-center gap-1">
                         <EqualizerBars isPlaying={true} size="sm" />
                       </div>
                     )}
@@ -713,8 +840,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     <h4
                       className={`text-xs font-bold truncate transition-colors ${
                         isCurrent
-                          ? 'text-[#FF0000]'
-                          : 'text-zinc-900 dark:text-white group-hover:text-[#FF0000]'
+                          ? 'text-cyan-500'
+                          : 'text-zinc-900 dark:text-white group-hover:text-cyan-500'
                       }`}
                       title={track.title}
                     >
@@ -737,7 +864,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
 
                       <button
                         onClick={() => actions.voteTrack(track.id)}
-                        className="p-1 rounded-md text-zinc-400 hover:text-[#FF0000] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
+                        className="p-1 rounded-md text-zinc-400 hover:text-cyan-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-0.5 text-[10px] font-mono font-bold"
                         title="Upvote on Aux"
                       >
                         <ThumbsUp className="w-3 h-3" />
@@ -753,7 +880,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       )}
 
       {/* =========================================================================
-          FEATURED STREAMING PLAYLIST SETS (SPOTIFY & YOUTUBE MUSIC)
+          FEATURED STREAMING PLAYLIST SETS
+          Clean: No platform names in titles or badges
           ========================================================================= */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -782,14 +910,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 
-                {/* Source Pill */}
+                {/* Clean Source Pill */}
                 <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md flex items-center gap-1.5 text-[10px] font-bold text-white border border-white/10">
-                  {playlist.source === 'spotify' ? (
-                    <SpotifyIcon className="w-3 h-3 text-[#1DB954]" />
-                  ) : (
-                    <YouTubeIcon className="w-3 h-3 text-[#FF0000]" />
-                  )}
-                  <span>{playlist.source === 'spotify' ? 'Spotify Curated' : 'YouTube Music'}</span>
+                  <Music className="w-3 h-3 text-emerald-400" />
+                  <span>Curated Set</span>
                 </div>
 
                 {/* Play Button Overlay */}
@@ -821,7 +945,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
       </section>
 
       {/* =========================================================================
-          SECTION: CURATED PARTY DROPS TABLE (CROSS-PLATFORM QUICK MIX)
+          SECTION: CURATED PARTY DROPS TABLE (CLEAN - ZERO PLATFORM BADGES ON ROWS)
           ========================================================================= */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -836,7 +960,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Hook drops fast-forwarded into the chorus across Spotify & YouTube Music.
+              Hook drops fast-forwarded into the chorus for pure uninterrupted energy.
             </p>
           </div>
 
@@ -854,7 +978,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-3 px-4 py-2.5 text-[11px] font-mono uppercase text-zinc-400 dark:text-zinc-500 border-b border-zinc-100 dark:border-zinc-800/60 font-semibold">
             <span className="col-span-1 text-center">#</span>
-            <span className="col-span-6 sm:col-span-5">Title & Source</span>
+            <span className="col-span-6 sm:col-span-5">Title & Artist</span>
             <span className="hidden sm:block sm:col-span-3 text-right">Drop Cue</span>
             <span className="col-span-3 sm:col-span-2 text-right">Duration</span>
             <span className="col-span-2 sm:col-span-1 text-center">Aux</span>
@@ -893,7 +1017,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                     <Play className="w-3.5 h-3.5 text-zinc-900 dark:text-white hidden group-hover:block" />
                   </div>
 
-                  {/* Col 2: Thumbnail, Title, Artist, Source */}
+                  {/* Col 2: Thumbnail, Title, Artist (Clean: NO platform icon) */}
                   <div className="col-span-6 sm:col-span-5 flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm relative">
                       <img
@@ -903,26 +1027,15 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                       />
                     </div>
                     <div className="min-w-0 truncate">
-                      <div className="flex items-center gap-1.5">
-                        <p
-                          className={`text-xs sm:text-sm font-semibold truncate ${
-                            isCurrent
-                              ? 'text-emerald-700 dark:text-[#D4FF00] font-bold'
-                              : 'text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white'
-                          }`}
-                        >
-                          {track.title}
-                        </p>
-                        {track.source === 'spotify' ? (
-                          <span className="shrink-0 p-0.5 rounded text-[#1DB954]" title="Spotify">
-                            <SpotifyIcon className="w-3 h-3" />
-                          </span>
-                        ) : (
-                          <span className="shrink-0 p-0.5 rounded text-[#FF0000]" title="YouTube">
-                            <YouTubeIcon className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
+                      <p
+                        className={`text-xs sm:text-sm font-semibold truncate ${
+                          isCurrent
+                            ? 'text-emerald-700 dark:text-[#D4FF00] font-bold'
+                            : 'text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white'
+                        }`}
+                      >
+                        {track.title}
+                      </p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
                         {track.artist}
                       </p>
