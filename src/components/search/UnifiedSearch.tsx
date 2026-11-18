@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useMusicStore } from '../../store/useMusicStore';
 import { FastSearchService, SearchResponse } from '../../services/fastSearchService';
+import { CatalogService } from '../../services/catalogService';
 import { AlbumViewModal } from '../album/AlbumViewModal';
 import { EqualizerBars } from '../common/EqualizerBars';
 import { Track, Album, Artist } from '../../types';
@@ -101,6 +102,50 @@ export const UnifiedSearch: React.FC = () => {
     const m = Math.floor(secs / 60);
     const s = Math.floor(secs % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const handleQuickPlayAlbum = (album: Album) => {
+    // 1. If album already has loaded tracks
+    if (album.tracks && album.tracks.length > 0) {
+      actions.playTrack(album.tracks[0]);
+      album.tracks.slice(1).forEach((t) => actions.addToQueue(t));
+      return;
+    }
+
+    // 2. Check local catalog
+    const local = CatalogService.getAlbumById(album.id) || CatalogService.getAlbumById(album.title);
+    if (local && local.tracks && local.tracks.length > 0) {
+      actions.playTrack(local.tracks[0]);
+      local.tracks.slice(1).forEach((t) => actions.addToQueue(t));
+      return;
+    }
+
+    // 3. Match from search tracks list
+    const cleanTitle = album.title.replace(/\s*-\s*single/i, '').trim().toLowerCase();
+    const matchedTrack = searchData.tracks.find(
+      (t) =>
+        t.title.toLowerCase() === cleanTitle ||
+        t.album.toLowerCase() === album.title.toLowerCase() ||
+        t.albumId === album.id
+    );
+    if (matchedTrack) {
+      actions.playTrack(matchedTrack);
+      return;
+    }
+
+    // 4. Fallback instant playable track
+    const fallbackTrack: Track = {
+      id: `tr_${album.id}`,
+      title: album.title.replace(/\s*-\s*single/i, '').trim(),
+      artist: album.artist,
+      album: album.title,
+      duration: 210,
+      coverUrl: album.coverUrl,
+      source: album.source || 'spotify',
+      votes: 15,
+      dropTime: 28
+    };
+    actions.playTrack(fallbackTrack);
   };
 
   const displayedTracks = searchData.tracks;
@@ -210,6 +255,89 @@ export const UnifiedSearch: React.FC = () => {
             Top Result
           </h3>
 
+          {/* Top Hit: Track / Song Result */}
+          {searchData.topHit.type === 'track' && (
+            <div
+              onClick={() => {
+                const tr = searchData.topHit!.data as Track;
+                if (state.currentTrack?.id === tr.id) {
+                  actions.togglePlay();
+                } else {
+                  actions.playTrack(tr);
+                }
+              }}
+              className="p-5 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-950 to-black border border-zinc-800 text-white flex items-center justify-between gap-5 cursor-pointer group hover:border-emerald-500/50 transition-all shadow-xl max-w-xl"
+            >
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-800 shrink-0 border border-white/20 shadow-lg">
+                  <img
+                    src={(searchData.topHit.data as Track).coverUrl}
+                    alt={(searchData.topHit.data as Track).title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                  {state.isPlaying && state.currentTrack?.id === (searchData.topHit.data as Track).id && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <EqualizerBars isPlaying={true} size="md" />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[10px] font-mono uppercase font-bold text-emerald-400 border border-emerald-500/30">
+                    Top Song Result
+                  </span>
+                  <h4 className="text-xl font-display font-black text-white truncate mt-1 group-hover:text-emerald-400 transition-colors">
+                    {(searchData.topHit.data as Track).title}
+                  </h4>
+                  <p className="text-xs text-zinc-400 truncate mt-0.5">
+                    {(searchData.topHit.data as Track).artist} {(searchData.topHit.data as Track).album ? `· ${(searchData.topHit.data as Track).album}` : ''}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    actions.toggleLikeSong(searchData.topHit!.data as Track);
+                  }}
+                  className="p-3 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                  title="Like song"
+                >
+                  <Heart
+                    className={`w-5 h-5 ${
+                      actions.isSongLiked(
+                        (searchData.topHit!.data as Track).id,
+                        (searchData.topHit!.data as Track).title
+                      )
+                        ? 'fill-rose-500 text-rose-500'
+                        : ''
+                    }`}
+                  />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const tr = searchData.topHit!.data as Track;
+                    if (state.currentTrack?.id === tr.id) {
+                      actions.togglePlay();
+                    } else {
+                      actions.playTrack(tr);
+                    }
+                  }}
+                  className="w-12 h-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0"
+                  title="Play song"
+                >
+                  {state.isPlaying && state.currentTrack?.id === (searchData.topHit.data as Track).id ? (
+                    <Pause className="w-5 h-5 fill-current" />
+                  ) : (
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
           {searchData.topHit.type === 'artist' && (
             <div
               onClick={() => {
@@ -290,9 +418,10 @@ export const UnifiedSearch: React.FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedAlbum(searchData.topHit!.data as Album);
+                  handleQuickPlayAlbum(searchData.topHit!.data as Album);
                 }}
-                className="w-12 h-12 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform shrink-0"
+                className="w-12 h-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0"
+                title="Play immediately"
               >
                 <Play className="w-5 h-5 fill-current ml-0.5" />
               </button>
@@ -334,11 +463,18 @@ export const UnifiedSearch: React.FC = () => {
                     {album.type}
                   </div>
 
-                  {/* Floating Play Button */}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="w-11 h-11 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-xl transform scale-80 group-hover:scale-100 transition-transform">
+                  {/* Floating Play Button: plays immediately, stops event propagation */}
+                  <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleQuickPlayAlbum(album);
+                      }}
+                      className="w-11 h-11 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-xl transform scale-80 group-hover:scale-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title={album.type === 'single' ? 'Play single now' : 'Play album now'}
+                    >
                       <Play className="w-5 h-5 fill-current ml-0.5" />
-                    </div>
+                    </button>
                   </div>
                 </div>
 

@@ -96,7 +96,8 @@ export class FastSearchService {
     const allLocalTracks = [
       ...FEATURED_SPOTIFY_TRACKS,
       ...FEATURED_YOUTUBE_TRACKS,
-      ...OFFICIAL_ALBUMS.flatMap((a) => a.tracks)
+      ...OFFICIAL_ALBUMS.flatMap((a) => a.tracks),
+      ...OFFICIAL_SINGLES_AND_EPS.flatMap((a) => a.tracks)
     ];
 
     // Deduplicate tracks by id and sort matches
@@ -119,22 +120,30 @@ export class FastSearchService {
       return 0;
     });
 
-    // Determine Top Hit based on query relevance
+    // Determine Top Hit based on query relevance (tracks prioritized over albums when searching songs)
+    const exactTrack = matchedTracks.find((t) => t.title.toLowerCase() === q);
+    const exactArtist = matchedArtists.find((a) => a.name.toLowerCase() === q);
+    const exactAlbum = matchedAlbums.find((a) => a.title.toLowerCase() === q);
+
     let topHit: SearchResponse['topHit'] = undefined;
-    if (
-      matchedArtists.length > 0 &&
-      (matchedArtists[0].name.toLowerCase().startsWith(q) || q.startsWith(matchedArtists[0].name.toLowerCase()))
-    ) {
+    if (exactTrack) {
+      topHit = { type: 'track', data: exactTrack };
+    } else if (exactArtist) {
+      topHit = { type: 'artist', data: exactArtist };
+    } else if (exactAlbum && exactAlbum.type !== 'single') {
+      topHit = { type: 'album', data: exactAlbum };
+    } else if (matchedTracks.length > 0 && matchedTracks[0].title.toLowerCase().startsWith(q)) {
+      topHit = { type: 'track', data: matchedTracks[0] };
+    } else if (matchedArtists.length > 0 && matchedArtists[0].name.toLowerCase().startsWith(q)) {
       topHit = { type: 'artist', data: matchedArtists[0] };
-    } else if (
-      matchedAlbums.length > 0 &&
-      (matchedAlbums[0].title.toLowerCase().startsWith(q) || q.startsWith(matchedAlbums[0].title.toLowerCase()))
-    ) {
+    } else if (matchedAlbums.length > 0 && matchedAlbums[0].title.toLowerCase().startsWith(q)) {
       topHit = { type: 'album', data: matchedAlbums[0] };
     } else if (matchedTracks.length > 0) {
       topHit = { type: 'track', data: matchedTracks[0] };
     } else if (matchedArtists.length > 0) {
       topHit = { type: 'artist', data: matchedArtists[0] };
+    } else if (matchedAlbums.length > 0) {
+      topHit = { type: 'album', data: matchedAlbums[0] };
     }
 
     return {
@@ -314,14 +323,28 @@ export class FastSearchService {
           }
         });
 
-        // Smart Top Hit calculation
+        // Smart Top Hit calculation: track search priority over albums
+        const exactTrack = combinedTracks.find((t) => t.title.toLowerCase() === q);
+        const exactArtist = combinedArtists.find((a) => a.name.toLowerCase() === q);
+        const exactAlbum = combinedAlbums.find((a) => a.title.toLowerCase() === q);
+
         let topHit = localMatches.topHit;
-        if (!topHit && combinedArtists.length > 0) {
-          topHit = { type: 'artist', data: combinedArtists[0] };
-        } else if (!topHit && combinedAlbums.length > 0) {
-          topHit = { type: 'album', data: combinedAlbums[0] };
-        } else if (!topHit && combinedTracks.length > 0) {
+        if (exactTrack) {
+          topHit = { type: 'track', data: exactTrack };
+        } else if (exactArtist) {
+          topHit = { type: 'artist', data: exactArtist };
+        } else if (exactAlbum && exactAlbum.type !== 'single') {
+          topHit = { type: 'album', data: exactAlbum };
+        } else if (combinedTracks.length > 0 && combinedTracks[0].title.toLowerCase().startsWith(q)) {
           topHit = { type: 'track', data: combinedTracks[0] };
+        } else if (combinedArtists.length > 0 && combinedArtists[0].name.toLowerCase().startsWith(q)) {
+          topHit = { type: 'artist', data: combinedArtists[0] };
+        } else if (combinedTracks.length > 0) {
+          topHit = { type: 'track', data: combinedTracks[0] };
+        } else if (combinedArtists.length > 0) {
+          topHit = { type: 'artist', data: combinedArtists[0] };
+        } else if (combinedAlbums.length > 0) {
+          topHit = { type: 'album', data: combinedAlbums[0] };
         }
 
         const result: SearchResponse = {

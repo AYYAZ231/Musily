@@ -97,6 +97,20 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
     tracks.forEach((t) => actions.addToQueue(t));
   };
 
+  const handleQuickPlayAlbum = (album: Album) => {
+    if (album.tracks && album.tracks.length > 0) {
+      actions.playTrack(album.tracks[0]);
+      album.tracks.slice(1).forEach((t) => actions.addToQueue(t));
+      return;
+    }
+    const local = CatalogService.getAlbumById(album.id) || CatalogService.getAlbumById(album.title);
+    if (local && local.tracks && local.tracks.length > 0) {
+      actions.playTrack(local.tracks[0]);
+      local.tracks.slice(1).forEach((t) => actions.addToQueue(t));
+      return;
+    }
+  };
+
   const isSpotifyConnected = state.linkedAccounts.spotify.isConnected;
   const isYouTubeConnected = state.linkedAccounts.youtube.isConnected;
 
@@ -957,11 +971,18 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenPartyModal, onOpenAcco
                   {album.type}
                 </div>
 
-                {/* Floating Play Button */}
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="w-11 h-11 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-xl transform scale-80 group-hover:scale-100 transition-transform">
+                {/* Floating Play Button: plays track/album immediately */}
+                <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickPlayAlbum(album);
+                    }}
+                    className="w-11 h-11 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shadow-xl transform scale-80 group-hover:scale-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    title={album.type === 'single' ? 'Play single now' : 'Play album now'}
+                  >
                     <Play className="w-5 h-5 fill-current ml-0.5" />
-                  </div>
+                  </button>
                 </div>
               </div>
 
